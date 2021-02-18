@@ -1,14 +1,19 @@
 package config
 
 import (
+	"context"
 	"flag"
 	"fmt"
+	"log"
 	"strings"
+	"time"
 
+	"github.com/coreos/etcd/clientv3"
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 	_ "github.com/spf13/viper/remote"
+	"gopkg.in/yaml.v2"
 )
 
 var (
@@ -82,19 +87,28 @@ func readFlag() {
 	}
 }
 
-func readEtcd(path string) {
-	err := viper.AddRemoteProvider("etcd", viper.GetString(kEtcdEndpoint), path)
+func readEtcd() {
+	client, err := clientv3.New(clientv3.Config{
+		Endpoints:   strings.Split(viper.GetString(kEtcdEndpoint), ","),
+		DialTimeout: 5 * time.Second,
+	})
 	if err != nil {
-		panic(fmt.Sprintf("Fatal error while adding remote provider: %s\n", err))
+		panic(fmt.Sprintf("Fatal error while new etcd client: %s\n", err))
 	}
-	err = viper.ReadRemoteConfig()
+
+	ctx, cancleFunc := context.WithTimeout(context.TODO(), 5*time.Second)
+	defer cancleFunc()
+
+	rsp, err := client.Get(ctx, "/conf/game_service")
 	if err != nil {
-		panic(fmt.Sprintf("Fatal error while reading remote config: %s\n", err))
+		panic(fmt.Sprintf("Fatal error while get etcd key value: %s\n", err))
 	}
-	err = viper.WatchRemoteConfig()
+	var val interface{}
+	err = yaml.Unmarshal(rsp.Kvs[0].Value, &val)
 	if err != nil {
-		panic(fmt.Sprintf("Fatal error while watch remote config: %s\n", err))
+		panic(fmt.Sprintf("Faral error while etcd value unmarshal: %s\n", err))
 	}
+	log.Println("Etcd value: ", val)
 }
 
 func ReadConf() {
@@ -103,7 +117,7 @@ func ReadConf() {
 	readInConfig()
 	setDefault()
 	setOverride()
-	readEtcd("/etc/conf/")
+	readEtcd()
 }
 
 func ServiceId() string {
