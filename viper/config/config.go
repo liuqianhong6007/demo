@@ -47,18 +47,25 @@ func combineKey(prefix string, paths ...string) string {
 	return strings.Join(pathArray, ".")
 }
 
-func setDefault() {
-	viper.SetDefault(kServiceId, 1)
-	viper.SetDefault(kServicePort, 8000)
-	viper.SetDefault(kEtcdEndpoint, "http://127.0.0.1:2379")
-}
+func ReadConf() {
+	// read flag
+	pflag.CommandLine.AddGoFlagSet(flag.CommandLine)
+	pflag.Parse()
 
-func readInConfig() {
+	err := viper.BindPFlags(pflag.CommandLine)
+	if err != nil {
+		panic(fmt.Sprintf("Fatal error while bind pflags: %s\n", err))
+	}
+
+	// read env
+	viper.AutomaticEnv()
+
+	// read config file
 	viper.SetConfigName("game_service")
 	viper.SetConfigType("yaml")
 	viper.AddConfigPath("/etc/")
 	viper.AddConfigPath(".")
-	err := viper.ReadInConfig()
+	err = viper.ReadInConfig()
 	if err != nil {
 		panic(fmt.Sprintf("Fatal error while reading config file: %s\n", err))
 	}
@@ -67,27 +74,16 @@ func readInConfig() {
 	viper.OnConfigChange(func(e fsnotify.Event) {
 		// TODO when config file changes, what you expect to do in here
 	})
-}
 
-func setOverride() {
+	// set default
+	viper.SetDefault(kServiceId, 1)
+	viper.SetDefault(kServicePort, 8000)
+	viper.SetDefault(kEtcdEndpoint, "http://127.0.0.1:2379")
+
+	// set override
 	viper.Set(kLogDir, "log")
-}
 
-func readEnv() {
-	viper.AutomaticEnv()
-}
-
-func readFlag() {
-	pflag.CommandLine.AddGoFlagSet(flag.CommandLine)
-	pflag.Parse()
-
-	err := viper.BindPFlags(pflag.CommandLine)
-	if err != nil {
-		panic(fmt.Sprintf("Fatal error while bind pflags: %s\n", err))
-	}
-}
-
-func readEtcd() {
+	// read from remote
 	client, err := clientv3.New(clientv3.Config{
 		Endpoints:   strings.Split(viper.GetString(kEtcdEndpoint), ","),
 		DialTimeout: 5 * time.Second,
@@ -109,15 +105,6 @@ func readEtcd() {
 		panic(fmt.Sprintf("Faral error while etcd value unmarshal: %s\n", err))
 	}
 	log.Println("Etcd value: ", val)
-}
-
-func ReadConf() {
-	readFlag()
-	readEnv()
-	readInConfig()
-	setDefault()
-	setOverride()
-	readEtcd()
 }
 
 func ServiceId() string {
