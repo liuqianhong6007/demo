@@ -24,18 +24,27 @@ func Init(endpoints string) {
 	}
 }
 
-func Get(key string) (string, error) {
+type Kv struct {
+	Key string
+	Val string
+}
+
+func Get(key string) ([]Kv, error) {
 	ctx, cancleFunc := context.WithTimeout(context.TODO(), timeout)
 	defer cancleFunc()
 
-	rsp, err := client.Get(ctx, key)
+	rsp, err := client.Get(ctx, key, clientv3.WithPrefix())
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	if len(rsp.Kvs) > 0 {
-		return string(rsp.Kvs[0].Value), nil
+	var result []Kv
+	for _, kv := range rsp.Kvs {
+		result = append(result, Kv{
+			Key: string(kv.Key),
+			Val: string(kv.Value),
+		})
 	}
-	return "", nil
+	return result, nil
 }
 
 func Put(key, value string) error {

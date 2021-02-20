@@ -42,7 +42,7 @@ func Test_EtcdAdd(t *testing.T) {
 func Test_EtcdGet(t *testing.T) {
 	url := fmt.Sprintf("http://%s/etcd/get", host)
 	params := map[string]string{
-		"key": "key1",
+		"key": "key",
 	}
 	rsp, err := agent.Get(url, nil, params)
 	if err != nil {
