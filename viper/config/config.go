@@ -17,29 +17,11 @@ import (
 )
 
 var (
-	kServiceId           = combineKey("game_service", "server_id")
-	kServicePort         = combineKey("game_service", "port")
-	kPassportKey         = combineKey("game_service", "passport_key")
-	kGameplayManagerAddr = combineKey("game_service", "gameplay_manager_addr")
-	kEtcdEndpoint        = combineKey("game_service", "etcd_endpoint")
-	kFastwayAddr         = combineKey("fastway", "server_addr")
-	kFastwayAuthkey      = combineKey("fastway", "auth_key")
-	kDBHost              = combineKey("db", "host")
-	kDBPort              = combineKey("db", "port")
-	kDBUser              = combineKey("db", "user")
-	kDBPassword          = combineKey("db", "password")
-	kDBName              = combineKey("db", "name")
-	kLogDir              = combineKey("log", "dir")
-	kLogName             = combineKey("log", "name")
-	kLogMaxSize          = combineKey("log", "max_size")
-	kLogMaxAge           = combineKey("log", "max_age")
-	kLogMaxBackups       = combineKey("log", "max_backups")
-	kLogCompress         = combineKey("log", "compress")
-	kLogChanSize         = combineKey("log", "log_chan_size")
-	kLogReleaseMode      = combineKey("log", "release_mode")
+	setDefaultMap  = make(map[string]interface{})
+	setOverrideMap = make(map[string]interface{})
 )
 
-func combineKey(prefix string, paths ...string) string {
+func CombineKey(prefix string, paths ...string) string {
 	pathArray := []string{prefix}
 	for _, path := range paths {
 		pathArray = append(pathArray, path)
@@ -47,7 +29,21 @@ func combineKey(prefix string, paths ...string) string {
 	return strings.Join(pathArray, ".")
 }
 
-func ReadConf() {
+func SetDefault(key string, value interface{}) {
+	if _, ok := setDefaultMap[key]; ok {
+		panic("duplicate set default key: " + key)
+	}
+	setDefaultMap[key] = value
+}
+
+func SetOverride(key string, value interface{}) {
+	if _, ok := setOverrideMap[key]; ok {
+		panic("duplicate set override key: " + key)
+	}
+	setOverrideMap[key] = value
+}
+
+func ReadConf(configName, configTyp string) {
 	// read flag
 	pflag.CommandLine.AddGoFlagSet(flag.CommandLine)
 	pflag.Parse()
@@ -61,8 +57,8 @@ func ReadConf() {
 	viper.AutomaticEnv()
 
 	// read config file
-	viper.SetConfigName("game_service")
-	viper.SetConfigType("yaml")
+	viper.SetConfigName(configName)
+	viper.SetConfigType(configTyp)
 	viper.AddConfigPath("/etc/")
 	viper.AddConfigPath(".")
 	err = viper.ReadInConfig()
@@ -76,16 +72,19 @@ func ReadConf() {
 	})
 
 	// set default
-	viper.SetDefault(kServiceId, 1)
-	viper.SetDefault(kServicePort, 8000)
-	viper.SetDefault(kEtcdEndpoint, "http://127.0.0.1:2379")
+	for k, v := range setDefaultMap {
+		viper.SetDefault(k, v)
+	}
 
 	// set override
-	viper.Set(kLogDir, "log")
+	for k, v := range setOverrideMap {
+		viper.Set(k, v)
+	}
+}
 
-	// read from remote
+func ReadFromEtcd(endpoints, path string) {
 	client, err := clientv3.New(clientv3.Config{
-		Endpoints:   strings.Split(viper.GetString(kEtcdEndpoint), ","),
+		Endpoints:   strings.Split(endpoints, ","),
 		DialTimeout: 5 * time.Second,
 	})
 	if err != nil {
@@ -95,7 +94,7 @@ func ReadConf() {
 	ctx, cancleFunc := context.WithTimeout(context.TODO(), 5*time.Second)
 	defer cancleFunc()
 
-	rsp, err := client.Get(ctx, "/conf/game_service")
+	rsp, err := client.Get(ctx, path)
 	if err != nil {
 		panic(fmt.Sprintf("Fatal error while get etcd key value: %s\n", err))
 	}
@@ -105,84 +104,4 @@ func ReadConf() {
 		panic(fmt.Sprintf("Faral error while etcd value unmarshal: %s\n", err))
 	}
 	log.Println("Etcd value: ", val)
-}
-
-func ServiceId() string {
-	return viper.GetString(kServiceId)
-}
-
-func ServicePort() int {
-	return viper.GetInt(kServicePort)
-}
-
-func PassportKey() string {
-	return viper.GetString(kPassportKey)
-}
-
-func GameplayManagerAddr() string {
-	return viper.GetString(kGameplayManagerAddr)
-}
-
-func EtcdEndpoint() string {
-	return viper.GetString(kEtcdEndpoint)
-}
-
-func FastwayAddr() string {
-	return viper.GetString(kFastwayAddr)
-}
-
-func FastwayAuthkey() string {
-	return viper.GetString(kFastwayAuthkey)
-}
-
-func DBHost() string {
-	return viper.GetString(kDBHost)
-}
-
-func DBPort() int {
-	return viper.GetInt(kDBPort)
-}
-
-func DBUser() string {
-	return viper.GetString(kDBUser)
-}
-
-func DBPassword() string {
-	return viper.GetString(kDBPassword)
-}
-
-func DBName() string {
-	return viper.GetString(kDBName)
-}
-
-func LogDir() string {
-	return viper.GetString(kLogDir)
-}
-
-func LogName() string {
-	return viper.GetString(kLogName)
-}
-
-func LogMaxSize() int {
-	return viper.GetInt(kLogMaxSize)
-}
-
-func LogMaxAge() int {
-	return viper.GetInt(kLogMaxAge)
-}
-
-func LogMaxBackups() int {
-	return viper.GetInt(kLogMaxBackups)
-}
-
-func LogCompress() bool {
-	return viper.GetBool(kLogCompress)
-}
-
-func LogChanSize() int {
-	return viper.GetInt(kLogChanSize)
-}
-
-func LogReleaseMode() bool {
-	return viper.GetBool(kLogReleaseMode)
 }
