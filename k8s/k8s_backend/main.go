@@ -5,9 +5,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/liuqianhong6007/k8s_backend/config"
-	"github.com/liuqianhong6007/k8s_backend/k8s"
-	"github.com/liuqianhong6007/k8s_backend/route"
+	"github.com/liuqianhong6007/demo/k8s/k8s_backend/config"
+	"github.com/liuqianhong6007/demo/k8s/k8s_backend/k8s"
+	"github.com/liuqianhong6007/demo/k8s/k8s_backend/route"
 )
 
 func main() {

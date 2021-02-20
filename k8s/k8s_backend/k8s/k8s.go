@@ -2,17 +2,30 @@ package k8s
 
 import (
 	"k8s.io/client-go/kubernetes"
+	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/tools/clientcmd"
 )
 
-func InitK8s(cfgPath string) *kubernetes.Clientset {
+var gClientset *kubernetes.Clientset
+
+func InitK8s(cfgPath string) {
 	config, err := clientcmd.BuildConfigFromFlags("", cfgPath)
 	if err != nil {
 		panic(err)
 	}
-	clientSet, err := kubernetes.NewForConfig(config)
+	gClientset, err = kubernetes.NewForConfig(config)
 	if err != nil {
 		panic(err)
 	}
-	return clientSet
+}
+
+func Clientset() *kubernetes.Clientset {
+	if gClientset == nil {
+		panic("uninitialized kubernetes client set")
+	}
+	return gClientset
+}
+
+func CoreV1() v1.CoreV1Interface {
+	return Clientset().CoreV1()
 }
