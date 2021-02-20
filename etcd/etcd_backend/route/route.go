@@ -19,8 +19,9 @@ var routeMap = make(map[string]Route)
 
 func AddRoute(routes Routes) {
 	for _, route := range routes {
-		if _, ok := routeMap[route.Path]; ok {
-			panic("duplicate register router: " + route.Path)
+		id := route.Method + " " + route.Path
+		if _, ok := routeMap[id]; ok {
+			panic("duplicate register router: " + id)
 		}
 		routeMap[route.Path] = route
 	}
@@ -36,13 +37,36 @@ func checkValue(c *gin.Context, checkValue interface{}, errMsg ...string) {
 	switch val := checkValue.(type) {
 	case error:
 		if val != nil {
-			c.HTML(http.StatusInternalServerError, "500.tpl", nil)
-			panic(strings.Join(errMsg, "\n") + "\n" + val.Error())
+			errMsg1 := strings.Join(errMsg, "\n") + "\n" + val.Error()
+			FailJsonRsp(c, errMsg1)
+			panic(errMsg1)
 		}
 	case bool:
 		if !val {
-			c.HTML(http.StatusInternalServerError, "500.tpl", nil)
-			panic(strings.Join(errMsg, "\n"))
+			errMsg1 := strings.Join(errMsg, "\n")
+			FailJsonRsp(c, errMsg1)
+			panic(errMsg1)
 		}
 	}
+}
+
+type Code int
+
+const (
+	OK      = 1000
+	UNKNOWN = 9999
+)
+
+func SuccessJsonRsp(c *gin.Context, result interface{}) {
+	c.JSON(http.StatusOK, gin.H{
+		"code":   OK,
+		"result": result,
+	})
+}
+
+func FailJsonRsp(c *gin.Context, errMsg string) {
+	c.JSON(http.StatusInternalServerError, gin.H{
+		"code":    UNKNOWN,
+		"message": errMsg,
+	})
 }
