@@ -2,11 +2,14 @@ package main
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/liuqianhong6007/demo/viper/config"
 )
 
 func main() {
+	os.Setenv("GAME_SERVICE.SERVER_ID", "20")
+
 	config.ReadConf()
 
 	fmt.Printf("ServiceID: %s\n", config.ServiceId())
