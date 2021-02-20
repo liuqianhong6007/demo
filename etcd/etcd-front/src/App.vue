@@ -1,22 +1,16 @@
 <template>
   <div id="app">
-    <HelloWorld :msg="indexMsg" @click="onChangeIndexMsg"/>
+    <HelloWorld></HelloWorld>
   </div>
 </template>
 
 <script>
 import HelloWorld from './components/HelloWorld.vue'
-
 export default {
   name: 'App',
   components: {
     HelloWorld
   },
-  methods:{
-    onChangeIndexMsg: () =>{
-      this.store.commit('changeIndexMsg',"changed text");
-    }
-  }
 }
 </script>
 
