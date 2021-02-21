@@ -28,8 +28,25 @@ func AddRoute(routes Routes) {
 }
 
 func RegisterRoute(engine *gin.Engine) {
+	// 跨域中间件必须放在 handler 注册之前
+	engine.Use(Cors())
 	for _, route := range routeMap {
 		engine.Handle(route.Method, route.Path, route.Handler)
+	}
+}
+
+// 跨域中间件
+func Cors() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Header("Access-Control-Allow-Origin", "*")
+		c.Header("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
+		c.Header("Access-Control-Allow-Headers", "Access-Control-Allow-Origin,Authorization,Content-Type")
+		c.Header("Access-Control-Max-Age", "172800")
+		c.Header("Access-Control-Allow-Credentials", "true")
+		if c.Request.Method == "OPTIONS" {
+			c.JSON(http.StatusOK, nil)
+		}
+		c.Next()
 	}
 }
 
