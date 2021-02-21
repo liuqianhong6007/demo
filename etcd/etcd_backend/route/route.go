@@ -33,6 +33,8 @@ func RegisterRoute(engine *gin.Engine) {
 	for _, route := range routeMap {
 		engine.Handle(route.Method, route.Path, route.Handler)
 	}
+	// 静态资源服务器
+	engine.StaticFS("/html", http.Dir("./html"))
 }
 
 // 跨域中间件
