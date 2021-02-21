@@ -1,10 +1,11 @@
 package route
 
 import (
-	"github.com/liuqianhong6007/demo/etcd/etcd_backend/etcd"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+
+	"github.com/liuqianhong6007/demo/etcd/etcd_backend/etcd"
 )
 
 func init() {
@@ -29,33 +30,44 @@ func init() {
 
 func getEtcd(c *gin.Context) {
 	key := c.Query("key")
-	checkValue(c, key != "", "param[key] is null")
-
 	val, err := etcd.Get(key)
 	checkValue(c, err, "get etcd value error")
 
 	SuccessJsonRsp(c, val)
 }
 
+type PutEtcdParam struct {
+	Key string `json:"key"`
+	Val string `json:"val"`
+}
+
 func putEtcd(c *gin.Context) {
-	key := c.PostForm("key")
-	checkValue(c, key != "", "param[key] is null")
+	var param PutEtcdParam
+	err := c.BindJSON(&param)
+	checkValue(c, err, "param format error")
+	checkValue(c, param.Key != "", "param[key] is null")
+	checkValue(c, param.Val != "", "param[val] is null")
 
-	val := c.PostForm("val")
-	checkValue(c, val != "", "param[val] is null")
-
-	err := etcd.Put(key, val)
+	err = etcd.Put(param.Key, param.Val)
 	checkValue(c, err, "put etcd value error")
 
 	SuccessJsonRsp(c, nil)
 }
 
-func deleteEtcd(c *gin.Context) {
-	key := c.PostForm("key")
-	checkValue(c, key != "", "param[key] is null")
+type DelEtcdParam struct {
+	Keys []string `json:"keys"`
+}
 
-	err := etcd.Delete(key)
-	checkValue(c, err, "delete etcd value error")
+func deleteEtcd(c *gin.Context) {
+	var param DelEtcdParam
+	err := c.BindJSON(&param)
+	checkValue(c, err, "param format error")
+	checkValue(c, len(param.Keys) != 0, "param[keys] is null")
+
+	for _, key := range param.Keys {
+		err := etcd.Delete(key)
+		checkValue(c, err, "delete etcd value error")
+	}
 
 	SuccessJsonRsp(c, nil)
 }

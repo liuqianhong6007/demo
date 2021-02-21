@@ -1,10 +1,10 @@
 package test
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"net/url"
 	"testing"
 )
 
@@ -28,11 +28,11 @@ func readRsp(rsp *http.Response) string {
 
 func Test_EtcdAdd(t *testing.T) {
 	url1 := fmt.Sprintf("http://%s/etcd/add", host)
-	params := url.Values{
-		"key": {"key1"},
-		"val": {"val2"},
-	}
-	rsp, err := agent.PostForm(url1, nil, params)
+	buf, _ := json.Marshal(map[string]interface{}{
+		"key": "key10",
+		"val": "val10",
+	})
+	rsp, err := agent.Post(url1, nil, buf)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -53,10 +53,10 @@ func Test_EtcdGet(t *testing.T) {
 
 func Test_EtcdDelete(t *testing.T) {
 	url1 := fmt.Sprintf("http://%s/etcd/delete", host)
-	params := url.Values{
-		"key": {"key1"},
-	}
-	rsp, err := agent.PostForm(url1, nil, params)
+	buf, _ := json.Marshal(map[string]interface{}{
+		"keys": []string{"key1", "key2"},
+	})
+	rsp, err := agent.Post(url1, nil, buf)
 	if err != nil {
 		t.Fatal(err)
 	}

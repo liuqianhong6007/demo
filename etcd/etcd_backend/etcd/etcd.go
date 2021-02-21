@@ -25,8 +25,8 @@ func Init(endpoints string) {
 }
 
 type Kv struct {
-	Key string
-	Val string
+	Key string `json:"key"`
+	Val string `json:"val"`
 }
 
 func Get(key string) ([]Kv, error) {
