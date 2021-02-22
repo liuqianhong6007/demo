@@ -13,6 +13,6 @@ EXPOSE 8101
 WORKDIR /app
 COPY --from=gobuilder /go/etcd_backend/etcd_backend /app/etcd_backend
 COPY --from=gobuilder /go/etcd_backend/etcd_backend.yaml /app/etcd_backend.yaml
-COPY --from=nodebuilder /node/etcd_front/dist/* /app/html/
+COPY --from=nodebuilder /node/etcd_front/dist/ /app/html/
 CMD ["./etcd_backend"]
 
