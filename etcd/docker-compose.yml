@@ -3,6 +3,6 @@ services:
   demo-etcd:
     build: .
     environment:
-      - ETCD_ADDR=47.101.171.154:12379
+      - ETCD_ADDR=${ETCD_ADDR}
     ports:
       - "8101:8101"
