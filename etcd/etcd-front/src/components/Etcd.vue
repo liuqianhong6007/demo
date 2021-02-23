@@ -33,7 +33,6 @@
             size="small"
             max-height="600"
             @selection-change="handleSelectionChange"
-            v-show="showMode == 'DEFAULT_MODE'"
           >
             <el-table-column type="selection" width="55px"></el-table-column>
             <el-table-column label="序号" align="center" width="55px">
@@ -72,43 +71,49 @@
           </el-table>
 
           <!-- 添加视图 -->
-          <el-form
-            ref="form"
-            :model="newEtcdPair"
-            label-width="40px"
-            v-show="showMode == 'ADD_ETCD_MODE'"
+          <el-drawer
+            :title="drawerTitle"
+            :visible.sync="showDrawer"
+            direction="rtl"
           >
-            <el-form-item label="键">
-              <el-input
-                v-model="newEtcdPair.key"
-                size="small"
-                :disabled="newEtcdPair.keyUneditable"
-              ></el-input>
-            </el-form-item>
-            <el-form-item label="值">
-              <el-input
-                v-model="newEtcdPair.val"
-                type="textarea"
-                :autosize="{ minRows: 2, maxRows: 20 }"
-              ></el-input>
-            </el-form-item>
-            <el-form-item>
-              <el-button
-                type="primary"
-                plain
-                size="small"
-                @click="handleConfirmAdd"
-                >提交</el-button
-              >
-              <el-button
-                type="primary"
-                plain
-                size="small"
-                @click="handleCancelAdd"
-                >取消</el-button
-              >
-            </el-form-item>
-          </el-form>
+            <el-form
+              ref="form"
+              :model="newEtcdPair"
+              label-width="40px"
+              v-show="showDrawer"
+            >
+              <el-form-item label="键">
+                <el-input
+                  v-model="newEtcdPair.key"
+                  size="small"
+                  :disabled="newEtcdPair.keyUneditable"
+                ></el-input>
+              </el-form-item>
+              <el-form-item label="值">
+                <el-input
+                  v-model="newEtcdPair.val"
+                  type="textarea"
+                  :autosize="{ minRows: 2, maxRows: 20 }"
+                ></el-input>
+              </el-form-item>
+              <el-form-item>
+                <el-button
+                  type="primary"
+                  plain
+                  size="small"
+                  @click="handleConfirmAdd"
+                  >提交</el-button
+                >
+                <el-button
+                  type="primary"
+                  plain
+                  size="small"
+                  @click="handleCancelAdd"
+                  >取消</el-button
+                >
+              </el-form-item>
+            </el-form>
+          </el-drawer>
         </el-col>
       </el-row>
     </el-main>
@@ -128,7 +133,8 @@ export default {
       etcdKey: "",
       etcdValueList: [],
       multiSelection: [],
-      showMode: "DEFAULT_MODE",
+      showDrawer: false,
+      drawerTitle: "",
       newEtcdPair: {
         keyUneditable: false,
         key: "",
@@ -176,7 +182,8 @@ export default {
         });
     },
     handleAdd() {
-      this.showMode = "ADD_ETCD_MODE";
+      this.drawerTitle = "添加建";
+      this.showDrawer = true;
     },
     handleConfirmAdd() {
       if (this.newEtcdPair.key == "" || this.newEtcdPair.val == "") {
@@ -191,7 +198,7 @@ export default {
           } else {
             this.newEtcdPair.key = "";
             this.newEtcdPair.val = "";
-            this.showMode = "DEFAULT_MODE";
+            this.showDrawer = false;
             this.handleSearch();
           }
         })
@@ -203,13 +210,14 @@ export default {
       this.newEtcdPair.key = "";
       this.newEtcdPair.val = "";
       this.newEtcdPair.keyUneditable = false;
-      this.showMode = "DEFAULT_MODE";
+      this.showDrawer = false;
     },
     handleEdit(row) {
       this.newEtcdPair.key = row.key;
       this.newEtcdPair.val = row.val;
       this.newEtcdPair.keyUneditable = true;
-      this.showMode = "ADD_ETCD_MODE";
+      this.drawerTitle = "编辑键";
+      this.showDrawer = true;
     },
     handleDel(row) {
       let keys = [row.key];
