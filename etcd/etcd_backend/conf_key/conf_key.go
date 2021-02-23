@@ -1,7 +1,7 @@
 package conf_key
 
 import (
-	"github.com/liuqianhong6007/demo/viper/config"
+	"github.com/liuqianhong6007/demo/config/viper/config"
 	"github.com/spf13/viper"
 )
 

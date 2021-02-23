@@ -3,8 +3,8 @@ module github.com/liuqianhong6007/demo/etcd/etcd_backend
 go 1.15
 
 require (
-	github.com/coreos/etcd v3.3.13+incompatible
+	github.com/coreos/etcd v3.3.25+incompatible
 	github.com/gin-gonic/gin v1.6.3
-	github.com/liuqianhong6007/demo/viper v0.0.0-20210220071108-eeeef7398e5e
+	github.com/liuqianhong6007/demo/config/viper v0.0.0-20210223045826-60d3a5ad04be
 	github.com/spf13/viper v1.7.1
 )
