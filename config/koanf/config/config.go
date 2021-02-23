@@ -68,3 +68,9 @@ func ReadConf(configName, configTyp string) {
 func Get(key string) interface{} {
 	return k.Get(key)
 }
+
+func Unmarshal(path string, o interface{}) {
+	if err := k.Unmarshal(path, o); err != nil {
+		panic("error unmarshalling: " + err.Error())
+	}
+}
