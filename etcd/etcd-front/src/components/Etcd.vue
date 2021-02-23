@@ -130,19 +130,20 @@ export default {
   name: "Etcd",
   data() {
     return {
-      etcdKey: "",
-      etcdValueList: [],
-      multiSelection: [],
-      showDrawer: false,
-      drawerTitle: "",
+      etcdKey: "", // 搜索框关键词
+      etcdValueList: [], // 表格展示数据
+      multiSelection: [], // 表格当前选中行1
+      showDrawer: false, // 是否显示侧边栏
+      drawerTitle: "", // 侧边栏标题
       newEtcdPair: {
-        keyUneditable: false,
-        key: "",
-        val: "",
+        keyUneditable: false, // 键是否可编辑
+        key: "", // 键
+        val: "", // 值
       },
     };
   },
   methods: {
+    // 关键词查询
     handleSearch() {
       reqSearchEtcdByKey(this.etcdKey)
         .then((response) => {
@@ -159,6 +160,7 @@ export default {
     handleSelectionChange(selection) {
       this.multiSelection = selection;
     },
+    // 删除选中行
     hanleMultiDel() {
       if (this.multiSelection.length == 0) {
         this.$message("未选择删除的项");
@@ -185,6 +187,7 @@ export default {
       this.drawerTitle = "添加建";
       this.showDrawer = true;
     },
+    // 添加新键值对
     handleConfirmAdd() {
       if (this.newEtcdPair.key == "" || this.newEtcdPair.val == "") {
         this.$message("空的键或值");
@@ -219,6 +222,7 @@ export default {
       this.drawerTitle = "编辑键";
       this.showDrawer = true;
     },
+    // 单行删除
     handleDel(row) {
       let keys = [row.key];
       reqDelEtcdByKey(keys)
