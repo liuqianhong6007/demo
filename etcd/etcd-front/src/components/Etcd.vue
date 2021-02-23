@@ -3,13 +3,22 @@
     <el-header>
       <el-row>
         <el-col :span="8">
-          <el-input v-model="etcdKey" size="small" placeholder="etcd key" @change="handleSearch">
+          <el-input
+            v-model="etcdKey"
+            size="small"
+            placeholder="etcd key"
+            @change="handleSearch"
+          >
             <template slot="prepend">搜索键</template>
           </el-input>
         </el-col>
-        <el-col :span="4">
-          <el-button type="primary" plain size="small" @click="handleAdd">添加</el-button>
-          <el-button type="danger" plain size="small" @click="hanleMultiDel">批量删除</el-button>
+        <el-col :span="4" style="float: right">
+          <el-button type="primary" plain size="small" @click="handleAdd"
+            >添加</el-button
+          >
+          <el-button type="danger" plain size="small" @click="hanleMultiDel"
+            >批量删除</el-button
+          >
         </el-col>
       </el-row>
     </el-header>
@@ -21,24 +30,43 @@
             :data="etcdValueList"
             stripe
             border
-            height="400px"
-            size="mini"
-            style="margin-top:10px"
+            size="small"
+            max-height="600"
             @selection-change="handleSelectionChange"
-            v-show="showMode=='DEFAULT_MODE'"
+            v-show="showMode == 'DEFAULT_MODE'"
           >
             <el-table-column type="selection" width="55px"></el-table-column>
             <el-table-column label="序号" align="center" width="55px">
               <template scope="scope">
-                <span>{{scope.$index + 1}}</span>
+                <span>{{ scope.$index + 1 }}</span>
               </template>
             </el-table-column>
-            <el-table-column prop="key" label="键" width="140px" align="center"></el-table-column>
-            <el-table-column prop="val" label="值" width="auto" align="center"></el-table-column>
+            <el-table-column
+              prop="key"
+              label="键"
+              width="140px"
+              align="center"
+            ></el-table-column>
+            <el-table-column
+              prop="val"
+              label="值"
+              width="auto"
+              align="center"
+            ></el-table-column>
             <el-table-column fixed="right" label="操作" width="200px">
               <template slot-scope="scope">
-                <el-button type="primary" size="small" @click="handleEdit(scope.row)">编辑</el-button>
-                <el-button type="danger" size="small" @click="handleDel(scope.row)">删除</el-button>
+                <el-button
+                  type="primary"
+                  size="small"
+                  @click="handleEdit(scope.row)"
+                  >编辑</el-button
+                >
+                <el-button
+                  type="danger"
+                  size="small"
+                  @click="handleDel(scope.row)"
+                  >删除</el-button
+                >
               </template>
             </el-table-column>
           </el-table>
@@ -48,7 +76,7 @@
             ref="form"
             :model="newEtcdPair"
             label-width="40px"
-            v-show="showMode=='ADD_ETCD_MODE'"
+            v-show="showMode == 'ADD_ETCD_MODE'"
           >
             <el-form-item label="键">
               <el-input v-model="newEtcdPair.key" size="small"></el-input>
@@ -57,12 +85,24 @@
               <el-input
                 v-model="newEtcdPair.val"
                 type="textarea"
-                :autosize="{ minRows: 2, maxRows: 20}"
+                :autosize="{ minRows: 2, maxRows: 20 }"
               ></el-input>
             </el-form-item>
             <el-form-item>
-              <el-button type="primary" plain size="small" @click="handleConfirmAdd">提交</el-button>
-              <el-button type="primary" plain size="small" @click="handleCancelAdd">取消</el-button>
+              <el-button
+                type="primary"
+                plain
+                size="small"
+                @click="handleConfirmAdd"
+                >提交</el-button
+              >
+              <el-button
+                type="primary"
+                plain
+                size="small"
+                @click="handleCancelAdd"
+                >取消</el-button
+              >
             </el-form-item>
           </el-form>
         </el-col>
@@ -75,7 +115,7 @@
 import {
   reqSearchEtcdByKey,
   reqDelEtcdByKey,
-  reqAddEtcdByKey
+  reqAddEtcdByKey,
 } from "../api/index.js";
 export default {
   name: "Etcd",
@@ -87,21 +127,21 @@ export default {
       showMode: "DEFAULT_MODE",
       newEtcdPair: {
         key: "",
-        val: ""
-      }
+        val: "",
+      },
     };
   },
   methods: {
     handleSearch() {
       reqSearchEtcdByKey(this.etcdKey)
-        .then(response => {
+        .then((response) => {
           if (response.data["code"] != 1000) {
             this.$message("search etcd failed");
           } else {
             this.etcdValueList = response.data["result"];
           }
         })
-        .catch(err => {
+        .catch((err) => {
           this.$message("search etcd failed:", err);
         });
     },
@@ -119,14 +159,14 @@ export default {
       }
 
       reqDelEtcdByKey(delKeys)
-        .then(response => {
+        .then((response) => {
           if (response.data["code"] != 1000) {
             this.$message("del etcd failed");
             return;
           }
           this.handleSearch();
         })
-        .catch(err => {
+        .catch((err) => {
           this.$message("del etcd failed: ", err);
         });
     },
@@ -140,7 +180,7 @@ export default {
       }
 
       reqAddEtcdByKey(this.newEtcdPair.key, this.newEtcdPair.val)
-        .then(response => {
+        .then((response) => {
           if (response.data["code"] != 1000) {
             this.$message("add etcd failed");
           } else {
@@ -150,7 +190,7 @@ export default {
             this.handleSearch();
           }
         })
-        .catch(err => {
+        .catch((err) => {
           this.$message("add etcd failed:", err);
         });
     },
@@ -167,21 +207,21 @@ export default {
     handleDel(row) {
       let keys = [row.key];
       reqDelEtcdByKey(keys)
-        .then(response => {
+        .then((response) => {
           if (response.data["code"] != 1000) {
             this.$message("del etcd failed");
             return;
           }
           this.handleSearch();
         })
-        .catch(err => {
+        .catch((err) => {
           this.$message("del etcd failed: ", err);
         });
-    }
+    },
   },
   created() {
     this.handleSearch();
-  }
+  },
 };
 </script>
 

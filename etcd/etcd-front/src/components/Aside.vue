@@ -1,8 +1,8 @@
 <template>
   <div>
     <el-row>
-      <el-col :span="4">
-        <h5>Etcd Manager</h5>
+      <el-col :span="3">
+        <h2>Etcd Manager</h2>
         <el-menu default-active="1" @select="handleSelect">
           <el-menu-item index="Home">
             <template slot="title">
