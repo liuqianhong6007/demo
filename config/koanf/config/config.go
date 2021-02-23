@@ -50,18 +50,18 @@ func ReadConf(configName, configTyp string) {
 		panic("not supported config type: " + configTyp)
 	}
 
-	// read from commandline
-	pflag.CommandLine.AddGoFlagSet(flag.CommandLine)
-	pflag.Parse()
-	if err := k.Load(posflag.Provider(pflag.CommandLine, ".", k), nil); err != nil {
-		panic("error loading commandline: " + err.Error())
-	}
-
 	// read from env
 	if err := k.Load(env.Provider(envPrefix, ".", func(s string) string {
 		return strings.ToLower(strings.TrimPrefix(s, envPrefix))
 	}), nil); err != nil {
 		panic("error loading environment: " + err.Error())
+	}
+
+	// read from commandline
+	pflag.CommandLine.AddGoFlagSet(flag.CommandLine)
+	pflag.Parse()
+	if err := k.Load(posflag.Provider(pflag.CommandLine, ".", k), nil); err != nil {
+		panic("error loading commandline: " + err.Error())
 	}
 }
 
