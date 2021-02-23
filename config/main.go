@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/liuqianhong6007/demo/viper/config"
+	"github.com/liuqianhong6007/demo/config/config"
 )
 
 func main() {

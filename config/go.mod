@@ -1,4 +1,4 @@
-module github.com/liuqianhong6007/demo/viper
+module github.com/liuqianhong6007/demo/config
 
 go 1.15
 
