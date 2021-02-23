@@ -79,7 +79,11 @@
             v-show="showMode == 'ADD_ETCD_MODE'"
           >
             <el-form-item label="键">
-              <el-input v-model="newEtcdPair.key" size="small"></el-input>
+              <el-input
+                v-model="newEtcdPair.key"
+                size="small"
+                :disabled="newEtcdPair.keyUneditable"
+              ></el-input>
             </el-form-item>
             <el-form-item label="值">
               <el-input
@@ -126,6 +130,7 @@ export default {
       multiSelection: [],
       showMode: "DEFAULT_MODE",
       newEtcdPair: {
+        keyUneditable: false,
         key: "",
         val: "",
       },
@@ -197,11 +202,13 @@ export default {
     handleCancelAdd() {
       this.newEtcdPair.key = "";
       this.newEtcdPair.val = "";
+      this.newEtcdPair.keyUneditable = false;
       this.showMode = "DEFAULT_MODE";
     },
     handleEdit(row) {
       this.newEtcdPair.key = row.key;
       this.newEtcdPair.val = row.val;
+      this.newEtcdPair.keyUneditable = true;
       this.showMode = "ADD_ETCD_MODE";
     },
     handleDel(row) {
