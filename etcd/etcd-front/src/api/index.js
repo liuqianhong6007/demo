@@ -1,7 +1,10 @@
 import axios from 'axios'
 
+let baseUrl = process.env.NODE_ENV === 'production' ?
+    window.location.protocol + "//" + window.location.hostname + ":" + window.location.port + "/" :
+    "http://127.0.0.1:8101/";
 const instance = axios.create({
-    baseURL: 'http://127.0.0.1:8101/',
+    baseURL: baseUrl,
     timeout: 1000,
     headers: { 'Content-Type': 'application/json;charset=UTF-8' }
 });
@@ -17,7 +20,7 @@ instance.interceptors.request.use(function (config) {
 });
 
 // 添加响应拦截器
-instance.interceptors.response.use(function(response){
+instance.interceptors.response.use(function (response) {
     // 对响应数据做些事
     return response;
 }, function (error) {
@@ -43,10 +46,10 @@ function http_agent(url = '', data = {}, method = 'get') {
 }
 
 // 查询 etcd
-export const reqSearchEtcdByKey = (key) => http_agent('/etcd/get',{key: key}, 'get')
+export const reqSearchEtcdByKey = (key) => http_agent('/etcd/get', { key: key }, 'get')
 
 // 删除 etcd
-export const reqDelEtcdByKey = (keys) => http_agent('/etcd/delete',{keys: keys}, 'post')
+export const reqDelEtcdByKey = (keys) => http_agent('/etcd/delete', { keys: keys }, 'post')
 
 //新增 etcd
-export const reqAddEtcdByKey = (key,val) => http_agent('/etcd/add',{key: key,val:val}, 'post')
+export const reqAddEtcdByKey = (key, val) => http_agent('/etcd/add', { key: key, val: val }, 'post')
