@@ -1,8 +1,9 @@
 package main
 
 import (
-	"github.com/liuqianhong6007/demo/config/config"
 	"github.com/spf13/viper"
+
+	"github.com/liuqianhong6007/demo/config/viper/config"
 )
 
 var (
