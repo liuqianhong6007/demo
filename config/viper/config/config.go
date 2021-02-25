@@ -16,34 +16,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-var (
-	setDefaultMap  = make(map[string]interface{})
-	setOverrideMap = make(map[string]interface{})
-)
-
-func CombineKey(prefix string, paths ...string) string {
-	pathArray := []string{prefix}
-	for _, path := range paths {
-		pathArray = append(pathArray, path)
-	}
-	return strings.Join(pathArray, ".")
-}
-
-func SetDefault(key string, value interface{}) {
-	if _, ok := setDefaultMap[key]; ok {
-		panic("duplicate set default key: " + key)
-	}
-	setDefaultMap[key] = value
-}
-
-func SetOverride(key string, value interface{}) {
-	if _, ok := setOverrideMap[key]; ok {
-		panic("duplicate set override key: " + key)
-	}
-	setOverrideMap[key] = value
-}
-
-func ReadConf(configName, configTyp string) {
+func ReadConf() {
 	// read flag
 	pflag.CommandLine.AddGoFlagSet(flag.CommandLine)
 	pflag.Parse()
@@ -54,11 +27,13 @@ func ReadConf(configName, configTyp string) {
 	}
 
 	// read env
-	viper.AutomaticEnv()
+	// viper.AutomaticEnv()
+	viper.BindEnv(kServiceId, "GAME_SERVICE_SERVER_ID")
+	viper.BindEnv(kServicePort, "GAME_SERVICE_PORT")
 
 	// read config file
-	viper.SetConfigName(configName)
-	viper.SetConfigType(configTyp)
+	viper.SetConfigName("demo")
+	viper.SetConfigType("yaml")
 	viper.AddConfigPath("/etc/")
 	viper.AddConfigPath(".")
 	err = viper.ReadInConfig()
@@ -72,14 +47,12 @@ func ReadConf(configName, configTyp string) {
 	})
 
 	// set default
-	for k, v := range setDefaultMap {
-		viper.SetDefault(k, v)
-	}
+	viper.SetDefault(kServiceId, 1)
+	//viper.SetDefault(kServicePort, 8000)
+	viper.SetDefault(kEtcdEndpoint, "http://127.0.0.1:2379")
 
 	// set override
-	for k, v := range setOverrideMap {
-		viper.Set(k, v)
-	}
+	viper.Set(kLogDir, "log")
 }
 
 func ReadFromEtcd(endpoints, path string) {

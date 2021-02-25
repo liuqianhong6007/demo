@@ -1,32 +1,33 @@
-package main
+package config
 
 import (
 	"github.com/spf13/viper"
-
-	"github.com/liuqianhong6007/demo/config/viper/config"
 )
 
 var (
-	kServiceId           = config.CombineKey("game_service", "server_id")
-	kServicePort         = config.CombineKey("game_service", "port")
-	kPassportKey         = config.CombineKey("game_service", "passport_key")
-	kGameplayManagerAddr = config.CombineKey("game_service", "gameplay_manager_addr")
-	kEtcdEndpoint        = config.CombineKey("game_service", "etcd_endpoint")
-	kFastwayAddr         = config.CombineKey("fastway", "server_addr")
-	kFastwayAuthkey      = config.CombineKey("fastway", "auth_key")
-	kDBHost              = config.CombineKey("db", "host")
-	kDBPort              = config.CombineKey("db", "port")
-	kDBUser              = config.CombineKey("db", "user")
-	kDBPassword          = config.CombineKey("db", "password")
-	kDBName              = config.CombineKey("db", "name")
-	kLogDir              = config.CombineKey("log", "dir")
-	kLogName             = config.CombineKey("log", "name")
-	kLogMaxSize          = config.CombineKey("log", "max_size")
-	kLogMaxAge           = config.CombineKey("log", "max_age")
-	kLogMaxBackups       = config.CombineKey("log", "max_backups")
-	kLogCompress         = config.CombineKey("log", "compress")
-	kLogChanSize         = config.CombineKey("log", "log_chan_size")
-	kLogReleaseMode      = config.CombineKey("log", "release_mode")
+	kServiceId           = "game_service.server_id"
+	kServicePort         = "game_service.port"
+	kPassportKey         = "game_service.passport_key"
+	kGameplayManagerAddr = "game_service.gameplay_manager_addr"
+	kEtcdEndpoint        = "game_service.etcd_endpoint"
+
+	kFastwayAddr    = "fastway.server_addr"
+	kFastwayAuthkey = "fastway.auth_key"
+
+	kDBHost     = "db.host"
+	kDBPort     = "db.port"
+	kDBUser     = "db.user"
+	kDBPassword = "db.password"
+	kDBName     = "db.name"
+
+	kLogDir         = "log.dir"
+	kLogName        = "log.name"
+	kLogMaxSize     = "log.max_size"
+	kLogMaxAge      = "log.max_age"
+	kLogMaxBackups  = "log.max_backups"
+	kLogCompress    = "log.compress"
+	kLogChanSize    = "log.log_chan_size"
+	kLogReleaseMode = "log.release_mode"
 )
 
 func ServiceId() string {
