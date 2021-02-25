@@ -51,7 +51,7 @@ func ReadConf(configName, configTyp string) {
 	}
 
 	// read from env
-	if err := k.Load(env.Provider(envPrefix, ".", func(s string) string {
+	if err := k.Load(env.Provider(envPrefix, "_", func(s string) string {
 		return strings.ToLower(strings.TrimPrefix(s, envPrefix))
 	}), nil); err != nil {
 		panic("error loading environment: " + err.Error())
