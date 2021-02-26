@@ -2,6 +2,7 @@ package config
 
 import (
 	"flag"
+	"strings"
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/pflag"
@@ -35,9 +36,8 @@ func ReadConf() {
 	})
 
 	// 绑定环境变量
-	viper.BindEnv(kHost, "HOST")
-	viper.BindEnv(kPort, "PORT")
-	viper.BindEnv(kEtcdAddr, "ETCD_ADDR")
+	viper.AutomaticEnv()
+	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 
 	// 读取命令行参数
 	pflag.CommandLine.AddGoFlagSet(flag.CommandLine)
