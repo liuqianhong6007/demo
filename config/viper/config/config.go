@@ -27,9 +27,8 @@ func ReadConf() {
 	}
 
 	// read env
-	// viper.AutomaticEnv()
-	viper.BindEnv(kServiceId, "GAME_SERVICE_SERVER_ID")
-	viper.BindEnv(kServicePort, "GAME_SERVICE_PORT")
+	viper.AutomaticEnv()
+	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 
 	// read config file
 	viper.SetConfigName("demo")
