@@ -1,0 +1,13 @@
+server:
+  host: 0.0.0.0
+  port: 80
+  need_invite_code: true
+db:
+  driver: mysql
+  host: 127.0.0.1
+  port: 3306
+  user: user
+  password: password
+  lib: lib
+  max_idle_conn: 0
+  max_open_conn: 0
