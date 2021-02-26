@@ -41,6 +41,7 @@ func ReadConf() {
 func Host() string         { return viper.GetString("server.host") }
 func Port() int            { return viper.GetInt("server.port") }
 func NeedInviteCode() bool { return viper.GetBool("server.need_invite_code") }
+func Secret() string       { return viper.GetString("server.secret") }
 func DbConf() (string, string, int, string, string, string, int, int) {
 	return viper.GetString("db.driver"),
 		viper.GetString("db.host"),

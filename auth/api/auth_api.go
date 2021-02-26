@@ -1,6 +1,7 @@
 package api
 
 import (
+	"crypto/md5"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -174,8 +175,13 @@ func validateAccount(account, checkPass string) error {
 }
 
 func returnLoginResponse(account, password string) LoginResponse {
+	hash := md5.New()
+	hash.Write([]byte(config.Secret()))
+	hash.Write([]byte(account))
+	hash.Write([]byte(password))
+	buf := hash.Sum(nil)
 	return LoginResponse{
 		Account: account,
-		Token:   "",
+		Token:   string(buf),
 	}
 }
