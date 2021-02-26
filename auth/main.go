@@ -1,6 +1,8 @@
 package main
 
 import (
+	"context"
+
 	"github.com/liuqianhong6007/demo/auth/api"
 	_ "github.com/liuqianhong6007/demo/auth/api"
 	"github.com/liuqianhong6007/demo/auth/config"
@@ -15,7 +17,8 @@ func main() {
 	internal.InitDatabase(config.DbConf())
 
 	// 检查数据库
-	api.CheckContext()
+	ctx := context.Background()
+	api.CheckContext(ctx)
 
 	// 开启 http 服务
 	internal.Start(config.Host(), config.Port())

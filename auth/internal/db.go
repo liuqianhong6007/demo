@@ -2,6 +2,7 @@ package internal
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -27,11 +28,11 @@ func NewDb(conf DatabaseConf) (*sql.DB, error) {
 	case "mysql":
 		dsn = fmt.Sprintf("%s:%s@tcp(%s:%d)/%s", conf.user, conf.password, conf.host, conf.port, conf.lib)
 	default:
-		return nil, WrapError{ErrMsg: "unsupported database driver: " + conf.driver}
+		return nil, DatabaseError(errors.New("unsupported database driver: " + conf.driver))
 	}
 	db, err := sql.Open(conf.driver, dsn)
 	if err != nil {
-		return nil, WrapError{Err: err}
+		return nil, DatabaseError(err)
 	}
 	if conf.maxIdleConn > 0 {
 		db.SetMaxIdleConns(conf.maxIdleConn)
@@ -41,7 +42,7 @@ func NewDb(conf DatabaseConf) (*sql.DB, error) {
 	}
 	err = db.Ping()
 	if err != nil {
-		return nil, WrapError{Err: err}
+		return nil, DatabaseError(err)
 	}
 	return db, nil
 }
