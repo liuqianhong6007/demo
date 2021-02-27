@@ -58,3 +58,20 @@ func Test_Login(t *testing.T) {
 	}
 	t.Log(readRsp(rsp))
 }
+
+func Test_CheckToken(t *testing.T) {
+	url := fmt.Sprintf("http://%s/checkToken", host)
+	buff, _ := json.Marshal(map[string]interface{}{
+		"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1MDAwLCJpc3MiOiJscWgiLCJhY2NvdW50IjoibHFoIn0.b_3hQx2aIiSzt9SeFirahzFeD13qUzSjOpMZ-4zK68g",
+	})
+	rsp, err := agent.Post(url, nil, buff)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if rsp.StatusCode == http.StatusUnauthorized {
+		t.Fatal("unauthorized")
+	} else if rsp.StatusCode == http.StatusOK {
+		t.Log("check token success")
+	}
+	t.Log(readRsp(rsp))
+}

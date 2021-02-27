@@ -21,6 +21,11 @@ func init() {
 			Path:    "/login",
 			Handler: Login,
 		},
+		{
+			Method:  http.MethodPost,
+			Path:    "/checkToken",
+			Handler: CheckToken,
+		},
 	})
 }
 
@@ -28,10 +33,6 @@ type RegisterRequest struct {
 	Account    string `json:"account"`     // 用户名
 	Password   string `json:"password"`    // 密码
 	InviteCode string `json:"invite_code"` // 邀请码
-}
-
-type RegisterResponse struct {
-	Account string `json:"account"` // 用户名
 }
 
 func Register(c *gin.Context) {
@@ -48,9 +49,7 @@ func Register(c *gin.Context) {
 	err = createAccount(param.Account, param.Password, param.InviteCode)
 	internal.CheckValue(c, err)
 
-	internal.SuccessJsonRsp(c, RegisterResponse{
-		Account: param.Account,
-	})
+	internal.SuccessJsonRsp(c, returnLoginResponse(param.Account))
 }
 
 func createAccount(account, password, inviteCode string) error {
@@ -144,7 +143,7 @@ func Login(c *gin.Context) {
 	err = validateAccount(param.Account, param.Password)
 	internal.CheckValue(c, err)
 
-	internal.SuccessJsonRsp(c, returnLoginResponse(param.Account, param.Password))
+	internal.SuccessJsonRsp(c, returnLoginResponse(param.Account))
 }
 
 func validateAccount(account, checkPass string) error {
@@ -154,16 +153,14 @@ func validateAccount(account, checkPass string) error {
 	}
 	defer rows.Close()
 
-	rows.Next()
+	if !rows.Next() {
+		return internal.ParamValidateError("account not exist")
+	}
 
 	var password string
 	err = rows.Scan(&password)
 	if err != nil {
 		return internal.DatabaseError(err)
-	}
-
-	if password == "" {
-		return internal.ParamValidateError("account not exist")
 	}
 
 	if password != checkPass {
@@ -173,10 +170,28 @@ func validateAccount(account, checkPass string) error {
 	return nil
 }
 
-func returnLoginResponse(account, password string) LoginResponse {
+func returnLoginResponse(account string) LoginResponse {
 	token := internal.CreateToken(config.Secret(), account)
 	return LoginResponse{
 		Account: account,
 		Token:   token,
 	}
+}
+
+type CheckTokenRequest struct {
+	Token string `json:"token"` // token
+}
+
+func CheckToken(c *gin.Context) {
+	var param CheckTokenRequest
+	err := c.BindJSON(&param)
+	internal.CheckValue(c, internal.ParamParseError(err))
+	internal.CheckValue(c, param.Token != "", "param[token] is null")
+
+	_, err = internal.ValidToken(config.Secret(), param.Token)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, nil)
+		return
+	}
+	c.JSON(http.StatusOK, nil)
 }
