@@ -1,7 +1,6 @@
 package api
 
 import (
-	"crypto/md5"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -26,13 +25,13 @@ func init() {
 }
 
 type RegisterRequest struct {
-	Account    string // 用户名
-	Password   string // 密码
-	InviteCode string // 邀请码
+	Account    string `json:"account"`     // 用户名
+	Password   string `json:"password"`    // 密码
+	InviteCode string `json:"invite_code"` // 邀请码
 }
 
 type RegisterResponse struct {
-	Account string
+	Account string `json:"account"` // 用户名
 }
 
 func Register(c *gin.Context) {
@@ -57,11 +56,11 @@ func Register(c *gin.Context) {
 func createAccount(account, password, inviteCode string) error {
 	// 校验邀请码
 	if config.NeedInviteCode() {
-		rows, err := internal.Db().Query(`select count(1) from invite_code where 'invite_code' = ?`, inviteCode)
+		rows, err := internal.Db().Query("select count(1) from invite_code where `invite_code` = ?", inviteCode)
 		if err != nil {
 			return internal.DatabaseError(err)
 		}
-		rows.Close()
+		defer rows.Close()
 
 		rows.Next()
 
@@ -83,11 +82,11 @@ func createAccount(account, password, inviteCode string) error {
 
 	// 验证该账号未注册
 	{
-		rows, err := internal.Db().Query(`select count(1) from account where 'account' = ?`, account)
+		rows, err := internal.Db().Query("select count(1) from account where `account` = ?", account)
 		if err != nil {
 			return internal.DatabaseError(err)
 		}
-		rows.Close()
+		defer rows.Close()
 
 		rows.Next()
 
@@ -104,7 +103,7 @@ func createAccount(account, password, inviteCode string) error {
 
 	// 创建账号
 	{
-		_, err = tx.Exec(`insert into account('account','password','create_time')values(?,?,?)`, account, password, internal.NowUnix())
+		_, err = tx.Exec("insert into account(`account`,`password`,`create_time`)values(?,?,?)", account, password, internal.NowUnix())
 		if err != nil {
 			tx.Rollback()
 			return internal.DatabaseError(err)
@@ -113,7 +112,7 @@ func createAccount(account, password, inviteCode string) error {
 
 	// 删除邀请码
 	if config.NeedInviteCode() {
-		_, err = internal.Db().Exec(`delete from invite_code where 'invite_code' = ?`, inviteCode)
+		_, err = internal.Db().Exec("delete from invite_code where `invite_code` = ?", inviteCode)
 		if err != nil {
 			tx.Rollback()
 			return internal.DatabaseError(err)
@@ -125,13 +124,13 @@ func createAccount(account, password, inviteCode string) error {
 }
 
 type LoginRequest struct {
-	Account  string // 用户名
-	Password string // 密码
+	Account  string `json:"account"`  // 用户名
+	Password string `json:"password"` // 密码
 }
 
 type LoginResponse struct {
-	Account string // 用户名
-	Token   string // token
+	Account string `json:"account"` // 用户名
+	Token   string `json:"token"`   // token
 }
 
 func Login(c *gin.Context) {
@@ -149,11 +148,11 @@ func Login(c *gin.Context) {
 }
 
 func validateAccount(account, checkPass string) error {
-	rows, err := internal.Db().Query(`select password from account where 'account' = ?`, account)
+	rows, err := internal.Db().Query("select password from account where `account` = ?", account)
 	if err != nil {
 		return internal.DatabaseError(err)
 	}
-	rows.Close()
+	defer rows.Close()
 
 	rows.Next()
 
@@ -175,13 +174,9 @@ func validateAccount(account, checkPass string) error {
 }
 
 func returnLoginResponse(account, password string) LoginResponse {
-	hash := md5.New()
-	hash.Write([]byte(config.Secret()))
-	hash.Write([]byte(account))
-	hash.Write([]byte(password))
-	buf := hash.Sum(nil)
+	token := internal.CreateToken(config.Secret(), account)
 	return LoginResponse{
 		Account: account,
-		Token:   string(buf),
+		Token:   token,
 	}
 }

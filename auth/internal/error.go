@@ -1,31 +1,34 @@
 package internal
 
 type WrapError struct {
-	err error
-	msg string
+	Err error
+	Msg string
 }
 
-func (e WrapError) Error() string {
-	msg := e.msg
-	if e.err != nil {
-		msg += "\n" + e.err.Error()
+func (e *WrapError) Error() string {
+	msg := e.Msg
+	if e.Err != nil {
+		msg += "\n" + e.Err.Error()
 	}
 	return msg
 }
 
-func (e WrapError) ExposeError() string {
-	return e.msg
+func (e *WrapError) ExposeError() string {
+	return e.Msg
 }
 
-func wrapErrorFuncWithMsg(msg string) func(err error) WrapError {
-	return func(err error) WrapError {
-		return WrapError{err, msg}
+func wrapErrorFuncWithMsg(msg string) func(err error) *WrapError {
+	return func(err error) *WrapError {
+		if err == nil {
+			return nil
+		}
+		return &WrapError{err, msg}
 	}
 }
 
-func wrapErrorFuncWithErr(err error) func(msg string) WrapError {
-	return func(msg string) WrapError {
-		return WrapError{err, msg}
+func wrapErrorFuncWithErr(err error) func(msg string) *WrapError {
+	return func(msg string) *WrapError {
+		return &WrapError{err, msg}
 	}
 }
 

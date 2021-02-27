@@ -57,15 +57,16 @@ func Cors() gin.HandlerFunc {
 func CheckValue(c *gin.Context, checkValue interface{}, errMsg ...string) {
 	switch val := checkValue.(type) {
 	case error:
-		if val != nil {
-			switch internalErr := val.(type) {
-			case WrapError:
-				FailJsonRsp(c, internalErr.ExposeError())
-			default:
-				FailJsonRsp(c, internalErr.Error())
+		switch internalErr := val.(type) {
+		case *WrapError:
+			if internalErr == nil {
+				return
 			}
-			panic(val)
+			FailJsonRsp(c, internalErr.Msg)
+		default:
+			FailJsonRsp(c, internalErr.Error())
 		}
+		panic(val)
 	case bool:
 		if !val {
 			errMsg1 := strings.Join(errMsg, "\n")
