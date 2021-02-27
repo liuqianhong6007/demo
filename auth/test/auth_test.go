@@ -29,7 +29,7 @@ func readRsp(rsp *http.Response) string {
 }
 
 func Test_Register(t *testing.T) {
-	url := fmt.Sprintf("http://%s/register", host)
+	url := fmt.Sprintf("http://%s/auth/register", host)
 	hash := md5.New()
 	password := hex.EncodeToString(hash.Sum([]byte("password")))
 	buf, _ := json.Marshal(map[string]interface{}{
@@ -45,7 +45,7 @@ func Test_Register(t *testing.T) {
 }
 
 func Test_Login(t *testing.T) {
-	url := fmt.Sprintf("http://%s/login", host)
+	url := fmt.Sprintf("http://%s/auth/login", host)
 	hash := md5.New()
 	password := hex.EncodeToString(hash.Sum([]byte("password")))
 	buff, _ := json.Marshal(map[string]interface{}{
@@ -60,7 +60,7 @@ func Test_Login(t *testing.T) {
 }
 
 func Test_CheckToken(t *testing.T) {
-	url := fmt.Sprintf("http://%s/checkToken", host)
+	url := fmt.Sprintf("http://%s/auth/checkToken", host)
 	buff, _ := json.Marshal(map[string]interface{}{
 		"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1MDAwLCJpc3MiOiJscWgiLCJhY2NvdW50IjoibHFoIn0.b_3hQx2aIiSzt9SeFirahzFeD13qUzSjOpMZ-4zK68g",
 	})

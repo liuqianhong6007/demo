@@ -11,7 +11,7 @@ func init() {
 	internal.AddRoute(internal.Routes{
 		{
 			Method:  http.MethodGet,
-			Path:    "/ping",
+			Path:    "/auth/ping",
 			Handler: ping,
 		},
 	})

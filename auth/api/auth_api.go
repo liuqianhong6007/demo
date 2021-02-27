@@ -13,17 +13,17 @@ func init() {
 	internal.AddRoute(internal.Routes{
 		{
 			Method:  http.MethodPost,
-			Path:    "/register",
+			Path:    "/auth/register",
 			Handler: Register,
 		},
 		{
 			Method:  http.MethodPost,
-			Path:    "/login",
+			Path:    "/auth/login",
 			Handler: Login,
 		},
 		{
 			Method:  http.MethodPost,
-			Path:    "/checkToken",
+			Path:    "/auth/checkToken",
 			Handler: CheckToken,
 		},
 	})
