@@ -1,4 +1,5 @@
 import axios from 'axios'
+import store from '../store/index.js'
 
 let baseUrl = process.env.NODE_ENV === 'production' ? "http://127.0.0.1:8080/" : "";
 
@@ -12,6 +13,12 @@ const instance = axios.create({
 // 添加请求拦截器
 instance.interceptors.request.use(function (config) {
     // 前置拦截
+    if (store.getters.getToken != "") {
+        config.headers['Authorization'] = store.getters.getToken; // 设置公共头
+    }
+    if (config.method == "get") {
+        config.headers['Content-Type'] = 'application/x-www-form-urlencoded;charset=UTF-8';
+    }
     return config;
 }, function (error) {
     // 请求错误时做些事
@@ -21,6 +28,10 @@ instance.interceptors.request.use(function (config) {
 // 添加响应拦截器
 instance.interceptors.response.use(function (response) {
     // 对响应数据做些事
+    if (response.status == 401) {// 未登录
+        location.replace('/login');
+        alert('未登录');
+    }
     return response;
 }, function (error) {
     // 请求错误时做些事

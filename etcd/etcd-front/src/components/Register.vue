@@ -77,13 +77,13 @@ export default {
   },
   methods: {
     resetForm() {
-      this.$refs['registerForm'].resetFields();
+      this.$refs["registerForm"].resetFields();
     },
     returnLoginPage() {
       this.$router.push({ name: "Login" });
     },
     register() {
-      this.$refs['registerForm'].validate(valid => {
+      this.$refs["registerForm"].validate(valid => {
         if (valid) {
           reqRegister(
             this.registerForm.account,
@@ -95,8 +95,14 @@ export default {
                 this.$message.error("注册失败:" + response.data["message"]);
                 return;
               }
+              // 设置token token
+              this.$store.commit(
+                "setAuth",
+                response.data["result"]["account"],
+                response.data["result"]["token"]
+              );
               this.$message.success("注册成功");
-              this.$router.push({ name: "Login" }); //跳转回登录页面
+              this.$router.push({ name: "Helloword" }); //跳转到首页
             })
             .catch(err => {
               this.$message.error("请求失败: " + err);
@@ -105,7 +111,7 @@ export default {
           this.$message("校验失败");
         }
       });
-    },
+    }
   }
 };
 </script>

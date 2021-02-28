@@ -7,18 +7,18 @@
 </template>
 
 <script>
-import {mapState} from "vuex"
+import { mapState } from "vuex";
 export default {
-  name: 'HelloWorld',
+  name: "HelloWorld",
   computed: mapState({
-    msg: state => state.indexMsg,
+    msg: state => state.indexMsg
   }),
-  methods:{
+  methods: {
     onChangeIndexMsg: function() {
-      this.$store.commit('changeIndexMsg',"changed text");
+      this.$store.commit("changeIndexMsg", "changed text");
     }
   }
-}
+};
 </script>
 
 <style>

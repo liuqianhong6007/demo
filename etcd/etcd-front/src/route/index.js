@@ -9,7 +9,7 @@ Vue.use(ElementUI)
 const App = () => import("@/App.vue")
 const Register = () => import("@/components/Register.vue")
 const Login = () => import("@/components/Login.vue")
-const Aside = () => import("@/components/Aside.vue")
+const Index = () => import("@/components/Index.vue")
 const HelloWorld = () => import("@/components/HelloWorld.vue")
 const Etcd = () => import("@/components/Etcd.vue")
 
@@ -32,12 +32,12 @@ const routes = [
       },
       {
         path: "index",
-        name: "Aside",
-        component: Aside,
+        name: "Index",
+        component: Index,
         children: [
           {
-            path: 'home',
-            name: "Home",
+            path: 'helloworld',
+            name: "Helloword",
             components: {
               RightView: HelloWorld
             }

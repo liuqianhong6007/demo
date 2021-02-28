@@ -11,12 +11,7 @@
       id="login-form"
     >
       <el-form-item label="账号" prop="account">
-        <el-input
-          v-model="loginForm.account"
-          placeholder="输入账号"
-          type="text"
-          autocomplete="on"
-        ></el-input>
+        <el-input v-model="loginForm.account" placeholder="输入账号" type="text" autocomplete="on"></el-input>
       </el-form-item>
       <el-form-item label="密码" prop="password">
         <el-input v-model="loginForm.password" placeholder="输入密码" show-password></el-input>
@@ -47,7 +42,7 @@ export default {
     return {
       loginForm: {
         account: "",
-        password: "",
+        password: ""
       },
       loginRule: {
         account: [
@@ -73,13 +68,13 @@ export default {
             validator: validatePass,
             trigger: "blur"
           }
-        ],
+        ]
       }
     };
   },
   methods: {
     resetForm() {
-      this.$refs['loginForm'].resetFields();
+      this.$refs["loginForm"].resetFields();
     },
     jumpToRegisterPage() {
       this.$router.push({ name: "Register" });
@@ -87,12 +82,18 @@ export default {
     login() {
       reqLogin(this.loginForm.account, this.loginForm.password)
         .then(response => {
-          if (response.status!=200){
+          if (response.status != 200) {
             this.$message.error(response.data["message"]);
             return;
           }
+          // 设置token token
+          this.$store.commit(
+            "setAuth",
+            response.data["result"]["account"],
+            response.data["result"]["token"]
+          );
           this.$message.success("登录成功");
-          this.$router.push({name: "Home"});
+          this.$router.push({ name: "Helloword" });
         })
         .catch(err => {
           this.$message.error("请求失败: " + err);
