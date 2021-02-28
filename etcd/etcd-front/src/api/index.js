@@ -1,8 +1,7 @@
 import axios from 'axios'
 
-let baseUrl = process.env.NODE_ENV === 'production' ?
-    window.location.protocol + "//" + window.location.hostname + ":" + window.location.port + "/" :
-    "http://127.0.0.1:8101/";
+let baseUrl = process.env.NODE_ENV === 'production' ? "http://127.0.0.1:8080/" : "";
+
 const instance = axios.create({
     baseURL: baseUrl,
     timeout: 1000,
@@ -44,6 +43,12 @@ function http_agent(url = '', data = {}, method = 'get') {
         });
     }
 }
+
+// 注册账号
+export const reqRegister = (account, password, inviteCode) => http_agent('/auth/register', { account: account, password: password, invite_code: inviteCode }, 'post')
+
+// 登录
+export const reqLogin = (account, password) => http_agent('/auth/login', { account: account, password: password }, 'post')
 
 // 查询 etcd
 export const reqSearchEtcdByKey = (key) => http_agent('/etcd/get', { key: key }, 'get')

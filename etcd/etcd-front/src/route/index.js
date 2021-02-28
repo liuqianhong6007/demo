@@ -6,31 +6,56 @@ import 'element-ui/lib/theme-chalk/index.css';
 Vue.use(VueRouter)
 Vue.use(ElementUI)
 
-const Aside = () => import("../components/Aside.vue")
-const HelloWorld = () => import("@/components/HelloWorld")
+const App = () => import("@/App.vue")
+const Register = () => import("@/components/Register.vue")
+const Login = () => import("@/components/Login.vue")
+const Aside = () => import("@/components/Aside.vue")
+const HelloWorld = () => import("@/components/HelloWorld.vue")
 const Etcd = () => import("@/components/Etcd.vue")
 
 const routes = [
   {
     path: "/",
-    name: "Aside",
-    component: Aside,
+    name: "App",
+    redirect: "/login",
+    component: App,
     children: [
       {
-        path: 'home',
-        name: "Home",
-        components: {
-          RightView: HelloWorld
-        }
+        path: "register",
+        name: "Register",
+        component: Register,
       },
       {
-        path: 'etcd',
-        name: "Etcd",
-        components: {
-          RightView: Etcd
-        }
+        path: "login",
+        name: "Login",
+        component: Login,
+      },
+      {
+        path: "index",
+        name: "Aside",
+        component: Aside,
+        children: [
+          {
+            path: 'home',
+            name: "Home",
+            components: {
+              RightView: HelloWorld
+            }
+          },
+          {
+            path: 'etcd',
+            name: "Etcd",
+            components: {
+              RightView: Etcd
+            }
+          },
+        ]
       },
     ]
+  },
+  {
+    path: '*',
+    redirect: "/login"
   }
 ]
 
