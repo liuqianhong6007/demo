@@ -185,9 +185,10 @@ type CheckTokenRequest struct {
 func CheckToken(c *gin.Context) {
 	var param CheckTokenRequest
 	err := c.BindJSON(&param)
-	internal.CheckValue(c, internal.ParamParseError(err))
-	internal.CheckValue(c, param.Token != "", "param[token] is null")
-
+	if err != nil || param.Token == "" {
+		c.JSON(http.StatusUnauthorized, nil)
+		return
+	}
 	_, err = internal.ValidToken(config.Secret(), param.Token)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, nil)
