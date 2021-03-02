@@ -5,9 +5,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/liuqianhong6007/demo/etcd/etcd_backend/config"
-	"github.com/liuqianhong6007/demo/etcd/etcd_backend/etcd"
-	"github.com/liuqianhong6007/demo/etcd/etcd_backend/route"
+	"github.com/liuqianhong6007/demo/etcd_backend/config"
+	"github.com/liuqianhong6007/demo/etcd_backend/etcd"
+	"github.com/liuqianhong6007/demo/etcd_backend/route"
 )
 
 func main() {

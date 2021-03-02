@@ -1,5 +1,5 @@
 module.exports = {
-    publicPath: process.env.NODE_ENV === 'production' ? '/product/etcd-front' : '/dev/etcd-front',
+    publicPath: process.env.NODE_ENV === 'production' ? '/product/front-page' : '/dev/front-page',
     devServer: {
         proxy: {
             '/auth': {

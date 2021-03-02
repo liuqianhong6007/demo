@@ -1,8 +1,0 @@
-version: '2'
-services:
-  demo-etcd:
-    build: .
-    environment:
-      - ETCD_ADDR=${ETCD_ADDR}
-    ports:
-      - "8101:8101"

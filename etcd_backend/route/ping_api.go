@@ -10,7 +10,7 @@ func init() {
 	AddRoute(Routes{
 		{
 			Method:  http.MethodGet,
-			Path:    "/ping",
+			Path:    "/etcd/ping",
 			Handler: ping,
 		},
 	})

@@ -1,4 +1,4 @@
-# etcd-front
+# front-page
 
 ## Project setup
 ```
