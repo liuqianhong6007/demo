@@ -1,7 +1,7 @@
 import axios from 'axios'
 import store from '../store/index.js'
 
-let baseUrl = process.env.NODE_ENV === 'production' ? "http://127.0.0.1:8080/" : "";
+let baseUrl = process.env.NODE_ENV === 'production' ? window.location.protocol + "//" + window.location.hostname + ":" + window.location.port : "";
 
 const instance = axios.create({
     baseURL: baseUrl,
