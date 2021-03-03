@@ -20,8 +20,8 @@ const store = new Vuex.Store({
         },
     },
     mutations: {
-        setAuth(state, account, token) {
-            state.auth = { account: account, token: token };
+        setAuth(state, param) {
+            state.auth = { account: param.account, token: param.token };
         },
         clearAuth(state) {
             state.auth.account = "";

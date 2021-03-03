@@ -88,9 +88,10 @@ export default {
           }
           // 设置token token
           this.$store.commit(
-            "setAuth",
-            response.data["result"]["account"],
-            response.data["result"]["token"]
+            "setAuth",{
+              account: response.data["result"]["account"],
+              token: response.data["result"]["token"]
+            }    
           );
           this.$message.success("登录成功");
           this.$router.push({ name: "Helloword" });
