@@ -12,7 +12,7 @@ import (
 
 var (
 	agent *HttpAgent
-	host  = "127.0.0.1:80"
+	host  = "127.0.0.1:8081"
 )
 
 func init() {
@@ -61,10 +61,9 @@ func Test_Login(t *testing.T) {
 
 func Test_CheckToken(t *testing.T) {
 	url := fmt.Sprintf("http://%s/auth/checkToken", host)
-	buff, _ := json.Marshal(map[string]interface{}{
-		"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1MDAwLCJpc3MiOiJscWgiLCJhY2NvdW50IjoibHFoIn0.b_3hQx2aIiSzt9SeFirahzFeD13qUzSjOpMZ-4zK68g",
-	})
-	rsp, err := agent.Post(url, nil, buff)
+	header := http.Header{}
+	header.Set("Authorization", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1MDAwLCJpc3MiOiJscWgiLCJhY2NvdW50IjoibHFoIn0.b_3hQx2aIiSzt9SeFirahzFeD13qUzSjOpMZ-4zK68g")
+	rsp, err := agent.Get(url, header, nil)
 	if err != nil {
 		t.Fatal(err)
 	}

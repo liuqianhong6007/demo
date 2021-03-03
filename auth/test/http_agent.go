@@ -36,11 +36,13 @@ func (h *HttpAgent) Get(path string, header http.Header, params map[string]strin
 		path = path + "?"
 	}
 
-	for key, value := range params {
-		path = path + key + "=" + value + "&"
-	}
-	if strings.HasSuffix(path, "&") {
-		path = path[:len(path)-1]
+	if params != nil {
+		for key, value := range params {
+			path = path + key + "=" + value + "&"
+		}
+		if strings.HasSuffix(path, "&") {
+			path = path[:len(path)-1]
+		}
 	}
 
 	client := http.Client{}

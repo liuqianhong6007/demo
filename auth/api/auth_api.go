@@ -1,6 +1,7 @@
 package api
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -22,7 +23,7 @@ func init() {
 			Handler: Login,
 		},
 		{
-			Method:  http.MethodPost,
+			Method:  http.MethodGet,
 			Path:    "/auth/checkToken",
 			Handler: CheckToken,
 		},
@@ -178,19 +179,16 @@ func returnLoginResponse(account string) LoginResponse {
 	}
 }
 
-type CheckTokenRequest struct {
-	Token string `json:"token"` // token
-}
-
 func CheckToken(c *gin.Context) {
-	var param CheckTokenRequest
-	err := c.BindJSON(&param)
-	if err != nil || param.Token == "" {
+	authorization := c.GetHeader("Authorization")
+	if authorization == "" {
+		log.Println("authorization is null")
 		c.JSON(http.StatusUnauthorized, nil)
 		return
 	}
-	_, err = internal.ValidToken(config.Secret(), param.Token)
+	_, err := internal.ValidToken(config.Secret(), authorization)
 	if err != nil {
+		log.Println("invalid authorization")
 		c.JSON(http.StatusUnauthorized, nil)
 		return
 	}
