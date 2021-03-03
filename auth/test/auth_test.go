@@ -63,7 +63,11 @@ func Test_CheckToken(t *testing.T) {
 	url := fmt.Sprintf("http://%s/auth/checkToken", host)
 	header := http.Header{}
 	header.Set("Authorization", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1MDAwLCJpc3MiOiJscWgiLCJhY2NvdW50IjoibHFoIn0.b_3hQx2aIiSzt9SeFirahzFeD13qUzSjOpMZ-4zK68g")
-	rsp, err := agent.Get(url, header, nil)
+	buf, _ := json.Marshal(map[string]interface{}{
+		"method": http.MethodGet,
+		"url":    "/etcd/get",
+	})
+	rsp, err := agent.Post(url, header, buf)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -71,6 +75,8 @@ func Test_CheckToken(t *testing.T) {
 		t.Fatal("unauthorized")
 	} else if rsp.StatusCode == http.StatusOK {
 		t.Log("check token success")
+	} else {
+		t.Fatal("unknown http status: ", rsp.StatusCode)
 	}
 	t.Log(readRsp(rsp))
 }

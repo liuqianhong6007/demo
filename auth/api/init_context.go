@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"io/ioutil"
 
-	"github.com/liuqianhong6007/demo/auth/config"
 	"github.com/liuqianhong6007/demo/auth/internal"
 )
 
@@ -30,7 +29,7 @@ func createTableIfNotExist(ctx context.Context, db *sql.DB, libName, tableName s
 
 func CheckContext(ctx context.Context) {
 	// 账号表
-	createTableIfNotExist(ctx, internal.Db(), config.DbLib(), "account", read("sql/account.sql"))
+	createTableIfNotExist(ctx, internal.Db(), internal.DbLib(), "account", read("sql/account.sql"))
 	// 邀请码表
-	createTableIfNotExist(ctx, internal.Db(), config.DbLib(), "invite_code", read("sql/invite_code.sql"))
+	createTableIfNotExist(ctx, internal.Db(), internal.DbLib(), "invite_code", read("sql/invite_code.sql"))
 }

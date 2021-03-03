@@ -1,12 +1,13 @@
 package api
 
 import (
+	"fmt"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/liuqianhong6007/demo/auth/config"
 	"github.com/liuqianhong6007/demo/auth/internal"
 )
 
@@ -23,7 +24,7 @@ func init() {
 			Handler: Login,
 		},
 		{
-			Method:  http.MethodGet,
+			Method:  http.MethodPost,
 			Path:    "/auth/checkToken",
 			Handler: CheckToken,
 		},
@@ -40,7 +41,7 @@ func Register(c *gin.Context) {
 	var param RegisterRequest
 	err := c.BindJSON(&param)
 	internal.CheckValue(c, internal.ParamParseError(err))
-	if config.NeedInviteCode() {
+	if internal.NeedInviteCode() {
 		internal.CheckValue(c, param.InviteCode != "", "param[invite_code] is null")
 	}
 	internal.CheckValue(c, param.Account != "", "param[account] is null")
@@ -55,7 +56,7 @@ func Register(c *gin.Context) {
 
 func createAccount(account, password, inviteCode string) error {
 	// 校验邀请码
-	if config.NeedInviteCode() {
+	if internal.NeedInviteCode() {
 		rows, err := internal.Db().Query("select count(1) from invite_code where `invite_code` = ?", inviteCode)
 		if err != nil {
 			return internal.DatabaseError(err)
@@ -111,7 +112,7 @@ func createAccount(account, password, inviteCode string) error {
 	}
 
 	// 删除邀请码
-	if config.NeedInviteCode() {
+	if internal.NeedInviteCode() {
 		_, err = internal.Db().Exec("delete from invite_code where `invite_code` = ?", inviteCode)
 		if err != nil {
 			tx.Rollback()
@@ -172,11 +173,16 @@ func validateAccount(account, checkPass string) error {
 }
 
 func returnLoginResponse(account string) LoginResponse {
-	token := internal.CreateToken(config.Secret(), account)
+	token := internal.CreateToken(internal.Secret(), account)
 	return LoginResponse{
 		Account: account,
 		Token:   token,
 	}
+}
+
+type CheckTokenRequest struct {
+	Method string `json:"method"`
+	Url    string `json:"url"`
 }
 
 func CheckToken(c *gin.Context) {
@@ -186,11 +192,49 @@ func CheckToken(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, nil)
 		return
 	}
-	_, err := internal.ValidToken(config.Secret(), authorization)
+	var param CheckTokenRequest
+	err := c.BindJSON(&param)
 	if err != nil {
-		log.Println("invalid authorization")
+		log.Println("request body error: ", err)
+		c.JSON(http.StatusUnauthorized, nil)
+		return
+	}
+
+	if param.Method == "" || param.Url == "" {
+		log.Println("param is null: ", param.Method, param.Url)
+		c.JSON(http.StatusUnauthorized, nil)
+		return
+	}
+
+	// 用户 token 校验
+	account, err := internal.ValidToken(internal.Secret(), authorization)
+	if err != nil {
+		log.Println("invalid authorization: ", err)
+		c.JSON(http.StatusUnauthorized, nil)
+		return
+	}
+
+	// 权限校验
+	var act string
+	switch param.Method {
+	case http.MethodGet:
+		act = "read"
+	case http.MethodPost, http.MethodDelete, http.MethodPut:
+		act = "write"
+	default:
+		log.Println("unsupported method: ", param.Method)
+		c.JSON(http.StatusUnauthorized, nil)
+		return
+	}
+
+	if ok := internal.CheckAccess(account, buildCastbinObj(param.Method, param.Url), act); !ok {
+		log.Println("castbin validate failed")
 		c.JSON(http.StatusUnauthorized, nil)
 		return
 	}
 	c.JSON(http.StatusOK, nil)
+}
+
+func buildCastbinObj(method, url string) string {
+	return fmt.Sprintf("%s[%s]", strings.ToUpper(method), url)
 }

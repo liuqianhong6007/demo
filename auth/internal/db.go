@@ -9,14 +9,14 @@ import (
 )
 
 type DatabaseConf struct {
-	driver      string
-	host        string
-	port        int
-	user        string
-	password    string
-	lib         string
-	maxIdleConn int
-	maxOpenConn int
+	Driver      string
+	Host        string
+	Port        int
+	User        string
+	Password    string
+	Lib         string
+	MaxIdleConn int
+	MaxOpenConn int
 }
 
 func NewDb(conf DatabaseConf) (*sql.DB, error) {
@@ -24,25 +24,25 @@ func NewDb(conf DatabaseConf) (*sql.DB, error) {
 		err error
 		dsn string
 	)
-	switch conf.driver {
+	switch conf.Driver {
 	case "mysql":
-		dsn = fmt.Sprintf("%s:%s@tcp(%s:%d)/%s", conf.user, conf.password, conf.host, conf.port, conf.lib)
+		dsn = fmt.Sprintf("%s:%s@tcp(%s:%d)/%s", conf.User, conf.Password, conf.Host, conf.Port, conf.Lib)
 	default:
-		return nil, DatabaseError(errors.New("unsupported database driver: " + conf.driver))
+		return nil, errors.New("unsupported database driver: " + conf.Driver)
 	}
-	db, err := sql.Open(conf.driver, dsn)
+	db, err := sql.Open(conf.Driver, dsn)
 	if err != nil {
-		return nil, DatabaseError(err)
-	}
-	if conf.maxIdleConn > 0 {
-		db.SetMaxIdleConns(conf.maxIdleConn)
-	}
-	if conf.maxOpenConn > 0 {
-		db.SetMaxOpenConns(conf.maxOpenConn)
+		return nil, err
 	}
 	err = db.Ping()
 	if err != nil {
-		return nil, DatabaseError(err)
+		return nil, err
+	}
+	if conf.MaxIdleConn > 0 {
+		db.SetMaxIdleConns(conf.MaxIdleConn)
+	}
+	if conf.MaxOpenConn > 0 {
+		db.SetMaxOpenConns(conf.MaxOpenConn)
 	}
 	return db, nil
 }
@@ -51,18 +51,9 @@ var (
 	gDb *sql.DB
 )
 
-func InitDatabase(driver, host string, port int, user, password, lib string, maxIdleConn, maxOpenConn int) {
+func InitDatabase(conf DatabaseConf) {
 	var err error
-	gDb, err = NewDb(DatabaseConf{
-		driver:      driver,
-		host:        host,
-		port:        port,
-		user:        user,
-		password:    password,
-		lib:         lib,
-		maxIdleConn: maxIdleConn,
-		maxOpenConn: maxOpenConn,
-	})
+	gDb, err = NewDb(conf)
 	if err != nil {
 		panic(err)
 	}

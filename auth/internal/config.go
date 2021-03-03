@@ -1,4 +1,4 @@
-package config
+package internal
 
 import (
 	"flag"
@@ -42,16 +42,15 @@ func Host() string         { return viper.GetString("server.host") }
 func Port() int            { return viper.GetInt("server.port") }
 func NeedInviteCode() bool { return viper.GetBool("server.need_invite_code") }
 func Secret() string       { return viper.GetString("server.secret") }
-func DbConf() (string, string, int, string, string, string, int, int) {
-	return viper.GetString("db.driver"),
-		viper.GetString("db.host"),
-		viper.GetInt("db.port"),
-		viper.GetString("db.user"),
-		viper.GetString("db.password"),
-		viper.GetString("db.lib"),
-		viper.GetInt("db.max_idle_conn"),
-		viper.GetInt("db.max_open_conn")
-}
-func DbLib() string {
-	return viper.GetString("db.lib")
-}
+
+func DbDriver() string            { return viper.GetString("db.driver") }
+func DbHost() string              { return viper.GetString("db.host") }
+func DbPort() int                 { return viper.GetInt("db.port") }
+func DbUser() string              { return viper.GetString("db.user") }
+func DbPassword() string          { return viper.GetString("db.password") }
+func DbLib() string               { return viper.GetString("db.lib") }
+func DbMaxIdleConn() int          { return viper.GetInt("db.max_idle_conn") }
+func DbMaxOpenConn() int          { return viper.GetInt("db.max_open_conn") }
+func CastbinModelPath() string    { return viper.GetString("castbin.model_path") }
+func CastbinPolicyDriver() string { return viper.GetString("castbin.policy_driver") }
+func CastbinPolicyPath() string   { return viper.GetString("castbin.policy_path") }
