@@ -7,6 +7,8 @@ FROM alpine:3.13.2
 EXPOSE 8081
 WORKDIR /app
 COPY --from=gobuilder /go/auth/auth.yaml /app/auth.yaml
+COPY --from=gobuilder /go/auth/rbac_model.conf /app/rbac_model.conf
+COPY --from=gobuilder /go/auth/rbac_policy.csv /app/rbac_policy.csv
 COPY --from=gobuilder /go/auth/sql/ /app/sql/
 COPY --from=gobuilder /go/auth/auth /app/auth
 CMD ["./auth"]
