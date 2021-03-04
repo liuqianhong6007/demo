@@ -7,6 +7,7 @@ services:
       DB_HOST: mysql
     depends_on:
       - mysql
+    restart: on-failure
 
   etcd-backend:
     image: lqha.xyz/etcd_backend
