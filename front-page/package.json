@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "axios": "^0.21.1",
+    "blueimp-md5": "^2.18.0",
     "core-js": "^3.6.5",
     "element-ui": "^2.15.0",
     "vue": "^2.6.11",

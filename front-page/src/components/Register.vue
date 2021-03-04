@@ -34,6 +34,7 @@
 
 <script>
 import { reqRegister } from "@/api/index.js";
+import md5 from "blueimp-md5";
 export default {
   data() {
     var validatePass = (rule, value, callback) => {
@@ -87,7 +88,7 @@ export default {
         if (valid) {
           reqRegister(
             this.registerForm.account,
-            this.registerForm.password,
+            md5(this.registerForm.password),
             this.registerForm.inviteCode
           )
             .then(response => {

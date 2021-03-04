@@ -27,6 +27,7 @@
 
 <script>
 import { reqLogin } from "@/api/index.js";
+import md5 from "blueimp-md5";
 export default {
   data() {
     var validatePass = (rule, value, callback) => {
@@ -80,7 +81,7 @@ export default {
       this.$router.push({ name: "Register" });
     },
     login() {
-      reqLogin(this.loginForm.account, this.loginForm.password)
+      reqLogin(this.loginForm.account, md5(this.loginForm.password))
         .then(response => {
           if (response.status != 200) {
             this.$message.error(response.data["message"]);
