@@ -1,22 +1,18 @@
 package config
 
 import (
-	"context"
 	"flag"
 	"fmt"
-	"log"
+	"reflect"
 	"strings"
-	"time"
 
-	"github.com/coreos/etcd/clientv3"
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 	_ "github.com/spf13/viper/remote"
-	"gopkg.in/yaml.v2"
 )
 
-func ReadConf() {
+func ReadConf(obj interface{}) {
 	// read flag
 	pflag.CommandLine.AddGoFlagSet(flag.CommandLine)
 	pflag.Parse()
@@ -45,35 +41,59 @@ func ReadConf() {
 		// TODO when config file changes, what you expect to do in here
 	})
 
-	// set default
-	viper.SetDefault(kServiceId, 1)
-	//viper.SetDefault(kServicePort, 8000)
-	viper.SetDefault(kEtcdEndpoint, "http://127.0.0.1:2379")
-
-	// set override
-	viper.Set(kLogDir, "log")
+	unmarshal(obj)
 }
 
-func ReadFromEtcd(endpoints, path string) {
-	client, err := clientv3.New(clientv3.Config{
-		Endpoints:   strings.Split(endpoints, ","),
-		DialTimeout: 5 * time.Second,
-	})
-	if err != nil {
-		panic(fmt.Sprintf("Fatal error while new etcd client: %s\n", err))
+func unmarshal(obj interface{}) {
+	typeObj := reflect.TypeOf(obj)
+	if typeObj.Kind() != reflect.Ptr {
+		panic("obj must be ptr")
+	}
+	valueObj := reflect.ValueOf(obj)
+	parse("", typeObj, valueObj)
+}
+
+func parse(prefix string, typeObj reflect.Type, valueObj reflect.Value) {
+	if typeObj.Kind() == reflect.Ptr {
+		typeObj = typeObj.Elem()
+		valueObj = valueObj.Elem()
 	}
 
-	ctx, cancleFunc := context.WithTimeout(context.TODO(), 5*time.Second)
-	defer cancleFunc()
+	switch typeObj.Kind() {
+	case reflect.Struct:
+		for i := 0; i < typeObj.NumField(); i++ {
+			field := typeObj.Field(i)
+			parse(getName(prefix, field), field.Type, valueObj.Field(i))
+		}
+	case reflect.Bool:
+		valueObj.SetBool(viper.GetBool(trimPrefixDot(prefix)))
 
-	rsp, err := client.Get(ctx, path)
-	if err != nil {
-		panic(fmt.Sprintf("Fatal error while get etcd key value: %s\n", err))
+	case reflect.Int, reflect.Int16, reflect.Int32, reflect.Int64, reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		valueObj.SetInt(viper.GetInt64(trimPrefixDot(prefix)))
+
+	case reflect.Float32, reflect.Float64:
+		valueObj.SetFloat(viper.GetFloat64(trimPrefixDot(prefix)))
+
+	case reflect.String:
+		valueObj.SetString(viper.GetString(trimPrefixDot(prefix)))
+
+	default:
+		panic("unsupported type")
 	}
-	var val interface{}
-	err = yaml.Unmarshal(rsp.Kvs[0].Value, &val)
-	if err != nil {
-		panic(fmt.Sprintf("Faral error while etcd value unmarshal: %s\n", err))
+}
+
+func getName(prefix string, field reflect.StructField) string {
+	if field.Tag.Get("viper") != "" {
+		prefix = prefix + "." + field.Tag.Get("viper")
+	} else {
+		prefix = prefix + "." + field.Name
 	}
-	log.Println("Etcd value: ", val)
+	return prefix
+}
+
+func trimPrefixDot(prefix string) string {
+	if strings.HasPrefix(prefix, ".") {
+		prefix = strings.TrimPrefix(prefix, ".")
+	}
+	return prefix
 }

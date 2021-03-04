@@ -2,39 +2,52 @@ package main
 
 import (
 	"fmt"
-	"os"
-
 	"github.com/liuqianhong6007/demo/config/viper/config"
 )
 
 func main() {
-	os.Setenv("GAME_SERVICE_SERVER_ID", "20")
-	os.Setenv("GAME_SERVICE_PORT", "8080")
 
-	config.ReadConf()
+	var conf Config
 
-	fmt.Println("ServiceID: ", config.ServiceId())
-	fmt.Println("ServicePort: ", config.ServicePort())
-	fmt.Println("PassportKey: ", config.PassportKey())
-	fmt.Println("GameplayManagerAddr: ", config.GameplayManagerAddr())
-	fmt.Println("EtcdEndpoint: ", config.EtcdEndpoint())
+	config.ReadConf(&conf)
 
-	fmt.Println("FastwayAddr: ", config.FastwayAddr())
-	fmt.Println("FastwayAuthkey: ", config.FastwayAuthkey())
+	fmt.Println(conf)
+}
 
-	fmt.Println("DBHost: ", config.DBHost())
-	fmt.Println("DBPort: ", config.DBPort())
-	fmt.Println("DBUser: ", config.DBUser())
-	fmt.Println("DBPassword: ", config.DBPassword())
-	fmt.Println("DBName: ", config.DBName())
-	fmt.Println("LogDir: ", config.LogDir())
-	fmt.Println("LogName: ", config.LogName())
-	fmt.Println("LogMaxSize: ", config.LogMaxSize())
-	fmt.Println("LogMaxAge: ", config.LogMaxAge())
-	fmt.Println("LogMaxBackups: ", config.LogMaxBackups())
-	fmt.Println("LogCompress: ", config.LogCompress())
-	fmt.Println("LogChanSize: ", config.LogChanSize())
-	fmt.Println("LogReleaseMode: ", config.LogReleaseMode())
+type Config struct {
+	GameService GameService `viper:"game_service"`
+	Fastway     Fastway     `viper:"fastway"`
+	DB          DB          `viper:"db"`
+	Log         Log         `viper:"log"`
+}
 
-	config.ReadFromEtcd(config.EtcdEndpoint(), "/conf/game_service")
+type GameService struct {
+	ServiceID           int    `viper:"server_id"`
+	Port                int    `viper:"port"`
+	PassportKey         string `viper:"passport_key"`
+	GameplayManagerAddr string `viper:"gameplay_manager_addr"`
+}
+
+type Fastway struct {
+	ServerAddr string `viper:"server_addr"`
+	AuthKey    string `viper:"auth_key"`
+}
+
+type DB struct {
+	Host     string `viper:"host"`
+	Port     int    `viper:"port"`
+	User     string `viper:"user"`
+	Password string `viper:"password"`
+	Name     string `viper:"name"`
+}
+
+type Log struct {
+	Dir         string `viper:"dir"`
+	Name        string `viper:"name"`
+	MaxSize     int    `viper:"max_size"`
+	MaxAge      int    `viper:"max_gge"`
+	MaxBackups  int    `viper:"max_backups"`
+	Compress    bool   `viper:"compress"`
+	LogChanSize int    `viper:"log_chan_size"`
+	ReleaseMode bool   `viper:"release_mode"`
 }
