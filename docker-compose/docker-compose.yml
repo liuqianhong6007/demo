@@ -7,6 +7,24 @@ services:
       DB_HOST: mysql
     depends_on:
       - mysql
+      - lua_init_database
+    restart: on-failure
+
+  lua_init_database:
+    image: lqha/base-luasql-mysql:latest
+    build: ./base-luasql-mysql
+    environment:
+      LUA_PATH: /lua/?.lua;;
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: user
+      DB_PASSWORD: password
+      DB_LIB: auth
+    depends_on:
+      - mysql
+    volumes:
+      - ./lua/:/lua
+    entrypoint: lua /lua/init_database.lua
     restart: on-failure
 
   etcd-backend:
@@ -36,6 +54,7 @@ services:
       - ./lua/:/usr/local/openresty/lualib/custom/
     depends_on:
       - front-page
+    restart: on-failure
 
   mysql:
     image: mysql:5.7.32
