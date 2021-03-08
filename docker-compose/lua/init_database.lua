@@ -23,9 +23,12 @@ end
 
 local env  = mysql.mysql()
 local conn = env:connect(lib,user,password,host,port)
-print("connect to "..user.."@"..host..":"..port.."success")
+if conn == nil then
+  close(env,conn,nil)
+  error("connect to "..user.."@"..host..":"..port.." failed")
+end
+print("connect to "..user.."@"..host..":"..port.." success")
 
-print("init account table...")
 local status,errorString = conn:execute([[
   CREATE TABLE IF NOT EXISTS `account` (
       `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '账号ID',
@@ -39,8 +42,8 @@ if status ~= 0 then
   close(env,conn,nil)
   error(errorSttring)
 end
+print("init account table success")
 
-print("init invite_code table...")
 status,errorString = conn:execute([[
   CREATE TABLE IF NOT EXISTS `invite_code` (
       `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '邀请码ID',
@@ -55,7 +58,7 @@ if status ~= 0 then
   close(env,conn,nil)
   error(errorSttring)
 end
+print("init invite_code table success")
 
-print("close mysql conn...")
 close(env,conn,nil)
-
+print("close mysql conn")
