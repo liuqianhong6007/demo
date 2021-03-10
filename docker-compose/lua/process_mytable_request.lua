@@ -8,9 +8,13 @@ end
 
 local function check(ngx,val,message)
   if not val then
-    ngx.say(cjson.encode({message = message}))
+    ngx.say(cjson.encode({code = 9999,message = message}))
     ngx.exit(ngx.HTTP_OK)
   end
+end
+
+local function success_json_response(data)
+  ngx.say(cjson.encode({code = 1000,result = data}))
 end
 
 -- 处理 nginx 请求
@@ -32,23 +36,23 @@ end
 if ngx.var.uri == "/mytable/query_table_list" then
   filter_method(ngx,"GET")
 
-  ngx.say(cjson.encode(g_mytable:query_table_list()))
+  success_json_response(g_mytable:query_table_list())
 
 elseif ngx.var.uri == "/mytable/query_table_struct" then
   filter_method(ngx,"GET")
   
   local table_name = ngx.var.arg_table_name
   check(ngx,table_name ~= nil,"param[table_name] is empty")
-  
-  ngx.say(cjson.encode(g_mytable:query_table_struct(table_name)))
+ 
+  success_json_response(g_mytable:query_table_struct(table_name)) 
   
 elseif ngx.var.uri == "/mytable/query_table_data" then
   filter_method(ngx,"GET")
 
   local table_name = ngx.var.arg_table_name
   check(ngx,table_name ~= nil,"param[table_name] is empty")
-  
-  ngx.say(cjson.encode(g_mytable:query_table_data(table_name)))
+ 
+  success_json_response(g_mytable:query_table_data(table_name)) 
 
 elseif ngx.var.uri == "/mytable/update_table_data" then
   filter_method(ngx,"POST") 
@@ -62,8 +66,8 @@ elseif ngx.var.uri == "/mytable/update_table_data" then
   local rows = param["rows"]
   check(ngx,table_name ~= nil,"param[table_name] is empty")
   check(ngx,rows ~= nil,"param[rows] is empty")
-  
-  g_mytable:update_table_data(table_name,rows)
+ 
+  success_json_response(g_mytable:update_table_data(table_name,rows)) 
 
 elseif ngx.var.uri == "/mytable/delete_table_data" then
   filter_method(ngx,"POST") 
@@ -77,8 +81,8 @@ elseif ngx.var.uri == "/mytable/delete_table_data" then
   local rows = param["rows"]
   check(ngx,table_name ~= nil,"param[table_name] is empty")
   check(ngx,rows ~= nil,"param[rows] is empty")
-  
-  g_mytable:delete_table_data(table_name,rows)
+ 
+  success_json_response(g_mytable:delete_table_data(table_name,rows)) 
 
 elseif ngx.var.uri == "/mytable/insert_table_data" then
   filter_method(ngx,"POST") 
@@ -93,7 +97,7 @@ elseif ngx.var.uri == "/mytable/insert_table_data" then
   check(ngx,table_name ~= nil,"param[table_name] is empty")
   check(ngx,rows ~= nil,"param[rows] is empty")
   
-  g_mytable:insert_table_data(table_name,rows)
+  success_json_response(g_mytable:insert_table_data(table_name,rows)) 
 
 else
   ngx.exit(ngx.HTTP_METHOD_NOT_IMPLEMENTED)
