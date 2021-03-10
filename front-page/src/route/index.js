@@ -12,6 +12,7 @@ const Login = () => import("@/components/Login.vue")
 const Index = () => import("@/components/Index.vue")
 const HelloWorld = () => import("@/components/HelloWorld.vue")
 const Etcd = () => import("@/components/Etcd.vue")
+const Database = () => import("../components/Database.vue")
 
 const routes = [
   {
@@ -47,6 +48,13 @@ const routes = [
             name: "Etcd",
             components: {
               RightView: Etcd
+            }
+          },
+          {
+            path: 'database',
+            name: "Database",
+            components: {
+              RightView: Database
             }
           },
         ]

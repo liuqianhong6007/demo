@@ -11,15 +11,20 @@
     <el-row>
       <el-col span="3">
         <h2>Demo</h2>
-        <el-menu default-active="1" @select="handleSelect">
+        <el-menu default-active="Helloworld" @select="handleSelect">
           <el-menu-item index="Helloworld">
             <template slot="title">
-              <span>Hello</span>
+              <span>欢迎</span>
             </template>
           </el-menu-item>
           <el-menu-item index="Etcd">
             <template slot="title">
               <span>ETCD</span>
+            </template>
+          </el-menu-item>
+          <el-menu-item index="Database">
+            <template slot="title">
+              <span>Database</span>
             </template>
           </el-menu-item>
         </el-menu>

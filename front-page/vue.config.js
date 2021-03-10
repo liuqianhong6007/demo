@@ -1,14 +1,18 @@
 module.exports = {
-    publicPath: process.env.NODE_ENV === 'production' ? '/product/front-page' : '/dev/front-page',
+    publicPath: '/product/front-page',
     devServer: {
         proxy: {
             '/auth': {
-                target: 'http://127.0.0.1:8081/',
+                target: 'http://47.101.171.154/',
                 ws: true,
                 changeOrigin: true
             },
             '/etcd': {
-                target: 'http://127.0.0.1:8082/',
+                target: 'http://47.101.171.154/',
+                changeOrigin: true
+            },
+            '/mytable': {
+                target: 'http://47.101.171.154/',
                 changeOrigin: true
             }
         }
