@@ -8,10 +8,12 @@ services:
     depends_on:
       - mysql
       - lua_init_database
+    volumes:
+      - ./rbac_policy.csv:/app/rbac_policy.csv
     restart: on-failure
 
   lua_init_database:
-    image: lqha/base-luasql-mysql:latest
+    image: lqha.xyz/base-luasql-mysql:latest
     build: ./base-luasql-mysql
     environment:
       LUA_PATH: /lua/?.lua;;
