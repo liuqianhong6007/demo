@@ -1,5 +1,6 @@
 import axios from 'axios'
 import store from '../store/index.js'
+import router from '../route/index.js'
 
 let baseUrl = process.env.NODE_ENV === 'production' ? window.location.protocol + "//" + window.location.hostname + ":" + window.location.port : "";
 
@@ -28,13 +29,12 @@ instance.interceptors.request.use(function (config) {
 // 添加响应拦截器
 instance.interceptors.response.use(function (response) {
     // 对响应数据做些事
-    if (response.status == 401) {// 未登录
-        location.replace('/login');
-        alert('未登录');
-    }
     return response;
 }, function (error) {
     // 请求错误时做些事
+    if (error.response.status == 401) {// 未登录
+        router.push("/login");
+    }
     return Promise.reject(error);
 });
 
