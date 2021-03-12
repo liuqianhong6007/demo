@@ -6,15 +6,20 @@ local function filter_method(ngx,allow_method)
  end
 end
 
-local function check(ngx,val,message)
+local function check(val,message)
   if not val then
-    ngx.say(cjson.encode({code = 9999,message = message}))
-    ngx.exit(ngx.HTTP_OK)
+    fail_json_response(message)
   end
 end
 
 local function success_json_response(data)
   ngx.say(cjson.encode({code = 1000,result = data}))
+  ngx.exit(ngx.HTTP_OK)
+end
+
+local function fail_json_response(message)
+  ngx.say(cjson.encode({code = 9999,message = message}))
+  ngx.exit(ngx.HTTP_OK)
 end
 
 -- 处理 nginx 请求
@@ -42,7 +47,7 @@ elseif ngx.var.uri == "/mytable/query_table_struct" then
   filter_method(ngx,"GET")
   
   local table_name = ngx.var.arg_table_name
-  check(ngx,table_name ~= nil,"param[table_name] is empty")
+  check(table_name ~= nil,"param[table_name] is empty")
  
   success_json_response(g_mytable:query_table_struct(table_name)) 
   
@@ -50,8 +55,9 @@ elseif ngx.var.uri == "/mytable/query_table_data" then
   filter_method(ngx,"GET")
 
   local table_name = ngx.var.arg_table_name
-  check(ngx,table_name ~= nil,"param[table_name] is empty")
- 
+  check(table_name ~= nil,"param[table_name] is empty")
+
+   
   success_json_response(g_mytable:query_table_data(table_name)) 
 
 elseif ngx.var.uri == "/mytable/update_table_data" then
@@ -59,13 +65,13 @@ elseif ngx.var.uri == "/mytable/update_table_data" then
   
   ngx.req.read_body()
   local body = ngx.req.get_body_data()
-  check(ngx,body ~= nil,"request body is empty")
+  check(body ~= nil,"request body is empty")
   
   local param = cjson.decode(ngx.req.get_body_data())
   local table_name = param["table_name"]
   local rows = param["rows"]
-  check(ngx,table_name ~= nil,"param[table_name] is empty")
-  check(ngx,rows ~= nil,"param[rows] is empty")
+  check(table_name ~= nil,"param[table_name] is empty")
+  check(rows ~= nil,"param[rows] is empty")
  
   success_json_response(g_mytable:update_table_data(table_name,rows)) 
 
@@ -74,13 +80,13 @@ elseif ngx.var.uri == "/mytable/delete_table_data" then
 
   ngx.req.read_body()
   local body = ngx.req.get_body_data()
-  check(ngx,body ~= nil,"request body is empty")
+  check(body ~= nil,"request body is empty")
 
   local param = cjson.decode(ngx.req.get_body_data())
   local table_name = param["table_name"]
   local rows = param["rows"]
-  check(ngx,table_name ~= nil,"param[table_name] is empty")
-  check(ngx,rows ~= nil,"param[rows] is empty")
+  check(table_name ~= nil,"param[table_name] is empty")
+  check(rows ~= nil,"param[rows] is empty")
  
   success_json_response(g_mytable:delete_table_data(table_name,rows)) 
 
@@ -89,15 +95,15 @@ elseif ngx.var.uri == "/mytable/insert_table_data" then
 
   ngx.req.read_body()
   local body = ngx.req.get_body_data()
-  check(ngx,body ~= nil,"request body is empty")
+  check(body ~= nil,"request body is empty")
   
   local param = cjson.decode(ngx.req.get_body_data())
   local table_name = param["table_name"]
   local rows = param["rows"]
-  check(ngx,table_name ~= nil,"param[table_name] is empty")
-  check(ngx,rows ~= nil,"param[rows] is empty")
-  
-  success_json_response(g_mytable:insert_table_data(table_name,rows)) 
+  check(table_name ~= nil,"param[table_name] is empty")
+  check(rows ~= nil,"param[rows] is empty")
+
+  success_json_response(g_mytable:insert_table_data(table_name,rows))
 
 else
   ngx.exit(ngx.HTTP_METHOD_NOT_IMPLEMENTED)
