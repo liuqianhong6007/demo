@@ -84,7 +84,7 @@ export default {
       reqLogin(this.loginForm.account, md5(this.loginForm.password))
         .then(response => {
           if (response.status != 200) {
-            this.$message.error(response.data["message"]);
+            this.$message.error("login failed: " + response.data["message"]);
             return;
           }
           // 设置token token
@@ -94,11 +94,11 @@ export default {
               token: response.data["result"]["token"]
             }    
           );
-          this.$message.success("登录成功");
+          this.$message.success("login success");
           this.$router.push({ name: "Helloword" });
         })
         .catch(err => {
-          this.$message.error("请求失败: " + err);
+          this.$message.error(err);
         });
     }
   }

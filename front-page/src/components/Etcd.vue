@@ -98,13 +98,13 @@ export default {
       reqSearchEtcdByKey(this.etcdKey)
         .then(response => {
           if (response.data["code"] != 1000) {
-            this.$message("search etcd failed");
+            this.$message.error("search etcd failed");
           } else {
             this.etcdValueList = response.data["result"];
           }
         })
         .catch(err => {
-          this.$message("search etcd failed:", err);
+          this.$message.error(err);
         });
     },
     handleSelectionChange(selection) {
@@ -113,7 +113,7 @@ export default {
     // 删除选中行
     hanleMultiDel() {
       if (this.multiSelection.length == 0) {
-        this.$message("未选择删除的项");
+        this.$message.warn("未选择删除的项");
         return;
       }
       var delKeys = [];
@@ -124,13 +124,14 @@ export default {
       reqDelEtcdByKey(delKeys)
         .then(response => {
           if (response.data["code"] != 1000) {
-            this.$message("del etcd failed");
+            this.$message.error("delete etcd failed");
             return;
           }
+          this.$message.success("delete etcd success");
           this.handleSearch();
         })
         .catch(err => {
-          this.$message("del etcd failed: ", err);
+          this.$message.error(err);
         });
     },
     handleAdd() {
@@ -140,15 +141,16 @@ export default {
     // 添加新键值对
     handleConfirmAdd() {
       if (this.newEtcdPair.key == "" || this.newEtcdPair.val == "") {
-        this.$message("空的键或值");
+        this.$message.warn("空的键或值");
         return;
       }
 
       reqAddEtcdByKey(this.newEtcdPair.key, this.newEtcdPair.val)
         .then(response => {
           if (response.data["code"] != 1000) {
-            this.$message("add etcd failed");
+            this.$message.error("add etcd failed");
           } else {
+            this.$message.success("add etcd success");
             this.newEtcdPair.key = "";
             this.newEtcdPair.val = "";
             this.showDrawer = false;
@@ -156,7 +158,7 @@ export default {
           }
         })
         .catch(err => {
-          this.$message("add etcd failed:", err);
+          this.$message.error(err);
         });
     },
     handleCancelAdd() {
@@ -178,13 +180,14 @@ export default {
       reqDelEtcdByKey(keys)
         .then(response => {
           if (response.data["code"] != 1000) {
-            this.$message("del etcd failed");
+            this.$message.error("delete etcd failed");
             return;
           }
+          this.$message.success("delete etcd success");
           this.handleSearch();
         })
         .catch(err => {
-          this.$message("del etcd failed: ", err);
+          this.$message.error(err);
         });
     }
   },

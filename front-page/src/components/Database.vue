@@ -63,20 +63,20 @@ export default {
       reqQueryTableList()
       .then((response) => {
         if (response.data["code"] != 1000) {
-          this.$message("query table list failed");
+          this.$message.error("query table list failed");
         } else {
           this.tables = response.data["result"];
         }
       })
       .catch((err) => {
-        this.$message("query table list failed:", err);
+        this.$message.error(err);
       });
     },
     queryTableStruct(tableName) {
       reqQueryTableStruct(tableName)
         .then((response) => {
           if (response.data["code"] != 1000) {
-            this.$message("query table struct failed");
+            this.$message.error("query table struct failed");
           } else {
             this.tableColumns = response.data["result"];
             for(let item of this.tableColumns){
@@ -87,14 +87,14 @@ export default {
           }
         })
         .catch((err) => {
-          this.$message("query table struct failed:", err);
+          this.$message.error(err);
         });
     },
     queryTableData(tableName) {
       reqQueryTableData(tableName)
         .then((response) => {
           if (response.data["code"] != 1000) {
-            this.$message("query table data failed");
+            this.$message.error("query table data failed");
           } else {
             let tableRows = response.data["result"];
             if (tableRows instanceof Array){ // 是否数组
@@ -108,7 +108,7 @@ export default {
           }
         })
         .catch((err) => {
-          this.$message("query table data failed:", err);
+          this.$message.error(err);
         });
     },
     updateTableData(tableName) {
@@ -119,15 +119,15 @@ export default {
       reqUpdateTableData(tableName,rows)
         .then((response) => {
           if (response.data["code"] != 1000) {
-            this.$message("update table data failed");
+            this.$message.error("update table data failed");
           } else {
-            this.$message("update table data success"); 
+            this.$message.success("update table data success");
             // 重新载入数据
             this.queryTableData(tableName); 
           }
         })
         .catch((err) => {
-          this.$message("query table data failed:", err);
+          this.$message.error(err);
         });
     },
     insertTableData(tableName) {
@@ -138,15 +138,15 @@ export default {
       reqInsertTableData(tableName,rows)
         .then((response) => {
           if (response.data["code"] != 1000) {
-            this.$message("insert table data failed");
+            this.$message.error("insert table data failed");
           } else {
-            this.$message("insert table data success"); 
+            this.$message.success("insert table data success");
             // 重新载入数据
             this.queryTableData(tableName); 
           }
         })
         .catch((err) => {
-          this.$message("query table data failed:", err);
+          this.$message.error(err);
         });
     },
     handleClick(tab) {
@@ -163,7 +163,7 @@ export default {
       // 同一时间只允许编辑一行
       for (let item of this.tableRows){
         if (item.isSet == true){
-          this.$message("请先保存或取消已修改");
+          this.$message.warn("请先保存或取消已修改");
           return;
         }
       }
@@ -198,15 +198,15 @@ export default {
       reqDeleteTableData(this.curTable,rows)
         .then((response) => {
           if (response.data["code"] != 1000) {
-            this.$message("delete table data failed");
+            this.$message.error("delete table data failed");
           } else {
-            this.$message("delete table data success"); 
+            this.$message.success("delete table data success");
             // 重新载入数据
             this.queryTableData(this.curTable); 
           }
         })
         .catch((err) => {
-          this.$message("delete table data failed:", err);
+          this.$message.error(err);
         });
     },
     // 添加
@@ -214,7 +214,7 @@ export default {
       // 同一时间只允许编辑一行
       for (let item of this.tableRows){
         if (item.isSet == true){
-          this.$message("请先保存或取消已修改");
+          this.$message.warn("请先保存或取消已修改");
           return;
         }
       }
@@ -225,7 +225,6 @@ export default {
       }
       this.tableRows.push(newRow)
       this.sel = newRow;
-      console.log(this.tableRows)
     },
     handleSelectionChange(selection) {
       this.multiSelection = selection;
@@ -233,7 +232,7 @@ export default {
     // 批量删除
     handleMultiDel(){
       if (this.multiSelection.length == 0) {
-        this.$message("未选择删除的项");
+        this.$message.warn("未选择删除的项");
         return;
       }
       let delRows = [];
@@ -243,15 +242,15 @@ export default {
       reqDeleteTableData(this.curTable,delRows)
         .then((response) => {
           if (response.data["code"] != 1000) {
-            this.$message("delete table data failed");
+            this.$message.error("delete table data failed");
           } else {
-            this.$message("delete table data success"); 
+            this.$message.success("delete table data success");
             // 重新载入数据
             this.queryTableData(this.curTable); 
           }
         })
         .catch((err) => {
-          this.$message("delete table data failed:", err);
+          this.$message.error(err);
         });
     }
   },

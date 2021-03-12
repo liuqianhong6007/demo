@@ -93,7 +93,7 @@ export default {
           )
             .then(response => {
               if (response.status != 200) {
-                this.$message.error("注册失败:" + response.data["message"]);
+                this.$message.error("register failed: " + response.data["message"]);
                 return;
               }
               // 设置token token
@@ -103,14 +103,14 @@ export default {
                   token: response.data["result"]["token"]
                 }    
               );
-              this.$message.success("注册成功");
+              this.$message.success("register success");
               this.$router.push({ name: "Helloword" }); //跳转到首页
             })
             .catch(err => {
-              this.$message.error("请求失败: " + err);
+              this.$message.error(err);
             });
         } else {
-          this.$message("校验失败");
+          this.$message.warn("validate failed");
         }
       });
     }

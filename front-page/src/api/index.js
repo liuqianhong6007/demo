@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { Message } from 'element-ui';
 import store from '../store/index.js'
 import router from '../route/index.js'
 
@@ -32,8 +33,19 @@ instance.interceptors.response.use(function (response) {
     return response;
 }, function (error) {
     // 请求错误时做些事
-    if (error.response.status == 401) {// 未登录
-        router.push("/login");
+    switch (error.response.status){
+        case 401: // 未登录
+            Message.error("用户登陆已失效，请重新登陆")
+            router.push("/login");
+            break;
+
+        case 500:
+            if (error.response.data["message"] != null){
+                Message.error(error.response.data["message"]);
+            }else{
+                Message.error(error.response.statusText);
+            }
+            break;
     }
     return Promise.reject(error);
 });
