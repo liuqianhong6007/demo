@@ -15,12 +15,12 @@ func main() {
 	config.ReadConf()
 
 	// 初始化 etcd
-	etcd.Init(config.EtcdAddr())
+	etcd.Init(config.GetConfig().EtcdAddr)
 
 	// 开启 http 服务
 	r := gin.Default()
 	route.RegisterRoute(r)
-	serverAddr := fmt.Sprintf("%s:%d", config.Host(), config.Port())
+	serverAddr := fmt.Sprintf("%s:%d", config.GetConfig().Host, config.GetConfig().Port)
 	if err := r.Run(serverAddr); err != nil {
 		panic(err)
 	}
