@@ -1,4 +1,0 @@
-p, etcd_admin, GET[/etcd/get], read
-p, etcd_admin, POST[/etcd/add], write
-p, etcd_admin, POST[/etcd/delete], write
-g, lqh, etcd_admin
