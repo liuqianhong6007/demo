@@ -12,7 +12,7 @@ db:
   lib: auth
   max_idle_conn: 0
   max_open_conn: 0
-castbin:
+casbin:
   model_path: rbac_model.conf
   policy_river: file
   policy_path: rbac_policy.csv

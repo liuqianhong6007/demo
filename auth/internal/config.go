@@ -1,56 +1,45 @@
 package internal
 
 import (
-	"flag"
-	"strings"
-
-	"github.com/fsnotify/fsnotify"
-	"github.com/spf13/pflag"
-	"github.com/spf13/viper"
+	"github.com/liuqianhong6007/viper_x"
 )
 
-func ReadConf() {
-	// 读取配置文件
-	viper.SetConfigName("auth")
-	viper.SetConfigType("yaml")
-	viper.AddConfigPath("/etc/")
-	viper.AddConfigPath(".")
-	err := viper.ReadInConfig()
-	if err != nil {
-		panic("Fatal error while reading config file: " + err.Error())
-	}
-	viper.WatchConfig()
-	viper.OnConfigChange(func(e fsnotify.Event) {
-		// TODO when config file changes, what you expect to do in here
-	})
-
-	// 绑定环境变量
-	viper.AutomaticEnv()
-	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
-
-	// 读取命令行参数
-	pflag.CommandLine.AddGoFlagSet(flag.CommandLine)
-	pflag.Parse()
-
-	err = viper.BindPFlags(pflag.CommandLine)
-	if err != nil {
-		panic("Fatal error while bind pflags: " + err.Error())
-	}
+type Config struct {
+	Server ServerCfg `viper:"server"`
+	Db     DbCfg     `viper:"db"`
+	Casbin CasbinCfg `viper:"casbin"`
 }
 
-func Host() string         { return viper.GetString("server.host") }
-func Port() int            { return viper.GetInt("server.port") }
-func NeedInviteCode() bool { return viper.GetBool("server.need_invite_code") }
-func Secret() string       { return viper.GetString("server.secret") }
+type ServerCfg struct {
+	Host           string `viper:"host"`
+	Port           int    `viper:"port"`
+	NeedInviteCode bool   `viper:"need_invite_code"`
+	Secret         string `viper:"secret"`
+}
 
-func DbDriver() string            { return viper.GetString("db.driver") }
-func DbHost() string              { return viper.GetString("db.host") }
-func DbPort() int                 { return viper.GetInt("db.port") }
-func DbUser() string              { return viper.GetString("db.user") }
-func DbPassword() string          { return viper.GetString("db.password") }
-func DbLib() string               { return viper.GetString("db.lib") }
-func DbMaxIdleConn() int          { return viper.GetInt("db.max_idle_conn") }
-func DbMaxOpenConn() int          { return viper.GetInt("db.max_open_conn") }
-func CastbinModelPath() string    { return viper.GetString("castbin.model_path") }
-func CastbinPolicyDriver() string { return viper.GetString("castbin.policy_driver") }
-func CastbinPolicyPath() string   { return viper.GetString("castbin.policy_path") }
+type DbCfg struct {
+	Driver      string `viper:"driver"`
+	Host        string `viper:"host"`
+	Port        int    `viper:"port"`
+	User        string `viper:"user"`
+	Password    string `viper:"password"`
+	Lib         string `viper:"lib"`
+	MaxIdleConn int    `viper:"max_idle_conn"`
+	MaxOpenConn int    `viper:"max_open_conn"`
+}
+
+type CasbinCfg struct {
+	ModelPath    string `viper:"model_path"`
+	PolicyDriver string `viper:"policy_driver"`
+	PolicyPath   string `viper:"policy_path"`
+}
+
+var gConfig Config
+
+func ReadConf() {
+	viper_x.ReadConf("auth", &gConfig)
+}
+
+func GetConfig() *Config {
+	return &gConfig
+}

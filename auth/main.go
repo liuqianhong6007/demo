@@ -10,26 +10,29 @@ func main() {
 	internal.ReadConf()
 
 	// 初始化数据库
+	dbCfg := internal.GetConfig().Db
 	dbConf := internal.DatabaseConf{
-		Driver:      internal.DbDriver(),
-		Host:        internal.DbHost(),
-		Port:        internal.DbPort(),
-		User:        internal.DbUser(),
-		Password:    internal.DbPassword(),
-		Lib:         internal.DbLib(),
-		MaxIdleConn: internal.DbMaxIdleConn(),
-		MaxOpenConn: internal.DbMaxOpenConn(),
+		Driver:      dbCfg.Driver,
+		Host:        dbCfg.Host,
+		Port:        dbCfg.Port,
+		User:        dbCfg.User,
+		Password:    dbCfg.Password,
+		Lib:         dbCfg.Lib,
+		MaxIdleConn: dbCfg.MaxIdleConn,
+		MaxOpenConn: dbCfg.MaxOpenConn,
 	}
 	internal.InitDatabase(dbConf)
 
 	// 初始化 castbin
+	castbinCfg := internal.GetConfig().Casbin
 	internal.InitCasbin(internal.CastbinConf{
-		ModelPath:    internal.CastbinModelPath(),
-		PolicyDriver: internal.CastbinPolicyDriver(),
-		PolicyPath:   internal.CastbinPolicyPath(),
+		ModelPath:    castbinCfg.ModelPath,
+		PolicyDriver: castbinCfg.PolicyDriver,
+		PolicyPath:   castbinCfg.PolicyPath,
 		DbConf:       dbConf,
 	})
 
 	// 开启 http 服务
-	internal.Start(internal.Host(), internal.Port())
+	serverCfg := internal.GetConfig().Server
+	internal.Start(serverCfg.Host, serverCfg.Port)
 }

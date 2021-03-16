@@ -41,7 +41,7 @@ func Register(c *gin.Context) {
 	var param RegisterRequest
 	err := c.BindJSON(&param)
 	internal.CheckValue(c, internal.ParamParseError(err))
-	if internal.NeedInviteCode() {
+	if internal.GetConfig().Server.NeedInviteCode {
 		internal.CheckValue(c, param.InviteCode != "", "param[invite_code] is null")
 	}
 	internal.CheckValue(c, param.Account != "", "param[account] is null")
@@ -56,7 +56,7 @@ func Register(c *gin.Context) {
 
 func createAccount(account, password, inviteCode string) error {
 	// 校验邀请码
-	if internal.NeedInviteCode() {
+	if internal.GetConfig().Server.NeedInviteCode {
 		rows, err := internal.Db().Query("select count(1) from invite_code where `invite_code` = ?", inviteCode)
 		if err != nil {
 			return internal.DatabaseError(err)
@@ -112,7 +112,7 @@ func createAccount(account, password, inviteCode string) error {
 	}
 
 	// 删除邀请码
-	if internal.NeedInviteCode() {
+	if internal.GetConfig().Server.NeedInviteCode {
 		_, err = internal.Db().Exec("delete from invite_code where `invite_code` = ?", inviteCode)
 		if err != nil {
 			tx.Rollback()
@@ -173,7 +173,7 @@ func validateAccount(account, checkPass string) error {
 }
 
 func returnLoginResponse(account string) LoginResponse {
-	token := internal.CreateToken(internal.Secret(), account)
+	token := internal.CreateToken(internal.GetConfig().Server.Secret, account)
 	return LoginResponse{
 		Account: account,
 		Token:   token,
@@ -207,7 +207,7 @@ func CheckToken(c *gin.Context) {
 	}
 
 	// 用户 token 校验
-	account, err := internal.ValidToken(internal.Secret(), authorization)
+	account, err := internal.ValidToken(internal.GetConfig().Server.Secret, authorization)
 	if err != nil {
 		log.Println("invalid authorization: ", err)
 		c.JSON(http.StatusUnauthorized, nil)
