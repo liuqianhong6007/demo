@@ -1,16 +1,18 @@
 package main
 
 import (
+	"flag"
 	"net"
 
 	"google.golang.org/grpc"
 
-	"github.com/liuqianhong6007/demo/grpc/cmd/server/config"
-	"github.com/liuqianhong6007/demo/grpc/cmd/server/module/room"
+	"github.com/liuqianhong6007/demo/grpc/room"
 )
 
 func main() {
-	lis, err := net.Listen("tcp", config.GrpcAddr())
+	addr := flag.String("addr", "0.0.0.0:8811", "grpc address")
+	flag.Parse()
+	lis, err := net.Listen("tcp", *addr)
 	if err != nil {
 		panic(err)
 	}
