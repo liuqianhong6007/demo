@@ -1,4 +1,4 @@
-package route
+package internal
 
 import (
 	"net/http"
@@ -32,7 +32,7 @@ func RegisterRoute(engine *gin.Engine) {
 	}
 }
 
-func checkValue(c *gin.Context, checkValue interface{}, errMsg ...string) {
+func CheckValue(c *gin.Context, checkValue interface{}, errMsg ...string) {
 	switch val := checkValue.(type) {
 	case error:
 		if val != nil {

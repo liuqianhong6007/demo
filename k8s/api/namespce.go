@@ -1,4 +1,4 @@
-package route
+package api
 
 import (
 	"net/http"
@@ -6,11 +6,11 @@ import (
 	"github.com/gin-gonic/gin"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/liuqianhong6007/demo/k8s/k8s_backend/k8s"
+	"github.com/liuqianhong6007/demo/k8s/internal"
 )
 
 func init() {
-	AddRoute(Routes{
+	internal.AddRoute(internal.Routes{
 		{
 			Method:  http.MethodGet,
 			Path:    "/namespace/list",
@@ -20,8 +20,8 @@ func init() {
 }
 
 func ListNamespace(c *gin.Context) {
-	namespaces, err := k8s.CoreV1().Namespaces().List(c, v1.ListOptions{})
-	checkValue(c, err, "list namespace error")
+	namespaces, err := internal.CoreV1().Namespaces().List(c, v1.ListOptions{})
+	internal.CheckValue(c, err, "list namespace error")
 
 	c.JSON(http.StatusOK, namespaces)
 }

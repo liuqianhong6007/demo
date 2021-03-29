@@ -1,13 +1,15 @@
-package route
+package api
 
 import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+
+	"github.com/liuqianhong6007/demo/k8s/internal"
 )
 
 func init() {
-	AddRoute(Routes{
+	internal.AddRoute(internal.Routes{
 		{
 			Method:  http.MethodGet,
 			Path:    "/ping",
