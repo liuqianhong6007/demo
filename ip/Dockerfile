@@ -6,4 +6,4 @@ RUN cd /go/ip && CGO_ENABLED=0 go build
 FROM alpine:3.13.2
 COPY --from=gobuilder /go/ip/ip /app/ip
 WORKDIR /app
-CMD ["./ip"]
+ENTRYPOINT ["./ip"]

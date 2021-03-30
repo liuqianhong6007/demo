@@ -18,16 +18,9 @@ func Cfg() *Config {
 }
 
 type Config struct {
-	Server Server `yaml:"server"`
-	K8s    K8s    `yaml:"k8s"`
-}
-
-type Server struct {
-	Host string `yaml:"host"`
-	Port int    `yaml:"port"`
-}
-
-type K8s struct {
+	Host    string `yaml:"host"`
+	Port    int    `yaml:"port"`
+	Inner   bool   `yaml:"inner"`
 	CfgPath string `yaml:"cfg_path"`
 }
 

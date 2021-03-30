@@ -1,0 +1,62 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: k8s-test-svc
+spec:
+  selector:
+    app: k8s-test
+  ports:
+  - name: k8s-test-port
+    port: 8082
+    protocol: TCP
+
+--- 
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: k8s-test-deploy
+spec:
+  selector:
+    matchLabels:
+      app: k8s-test
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: k8s-test
+    spec:
+      containers:
+      - name: k8s-test
+        image:  lqha.xyz/k8s-test:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8082
+        args:
+          - "--config=/app/config/config.yaml"
+        volumeMounts:
+        - name: config-volume
+          mountPath:  /app/config
+
+      volumes:
+      - name: config-volume
+        configMap:
+          name: k8s-test-cm
+          items:
+            - key: k8s-test-config
+              path: config.yaml
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: k8s-test-cm
+data:
+  k8s-test-config: |
+    host: 0.0.0.0
+    port: 8082
+    inner: true
+    cfg_path: .kube/config
+  
+
