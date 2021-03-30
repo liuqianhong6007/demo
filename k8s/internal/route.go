@@ -33,16 +33,20 @@ func RegisterRoute(engine *gin.Engine) {
 }
 
 func CheckValue(c *gin.Context, checkValue interface{}, errMsg ...string) {
+	msg := strings.Join(errMsg, "\n")
 	switch val := checkValue.(type) {
 	case error:
 		if val != nil {
-			c.HTML(http.StatusInternalServerError, "500.tpl", nil)
-			panic(strings.Join(errMsg, "\n") + "\n" + val.Error())
+			if msg == "" {
+				msg = val.Error()
+			}
+			c.JSON(http.StatusInternalServerError, msg)
+			panic(msg + "\n" + val.Error())
 		}
 	case bool:
 		if !val {
-			c.HTML(http.StatusInternalServerError, "500.tpl", nil)
-			panic(strings.Join(errMsg, "\n"))
+			c.JSON(http.StatusInternalServerError, msg)
+			panic(msg)
 		}
 	}
 }
