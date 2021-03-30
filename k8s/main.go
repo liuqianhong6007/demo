@@ -3,12 +3,12 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/liuqianhong6007/demo/k8s/internal"
 
 	"github.com/gin-gonic/gin"
 
 	_ "github.com/liuqianhong6007/demo/k8s/api"
-	"github.com/liuqianhong6007/demo/k8s/config"
-	"github.com/liuqianhong6007/demo/k8s/internal"
+	"github.com/liuqianhong6007/demo/k8s/com"
 )
 
 var cfgPath string
@@ -19,15 +19,15 @@ func init() {
 }
 
 func main() {
-	config.ReadConfig(cfgPath)
+	internal.ReadConfig(cfgPath)
 
 	// init k8s client
-	internal.InitK8s()
+	internal.InitK8sClientset(internal.Cfg().Inner, internal.Cfg().CfgPath)
 
 	r := gin.Default()
-	internal.RegisterRoute(r)
+	com.RegisterRoute(r)
 
-	serverAddr := fmt.Sprintf("%s:%d", config.Cfg().Host, config.Cfg().Port)
+	serverAddr := fmt.Sprintf("%s:%d", internal.Cfg().Host, internal.Cfg().Port)
 	if err := r.Run(serverAddr); err != nil {
 		panic(err)
 	}

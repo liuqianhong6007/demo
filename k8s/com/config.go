@@ -1,8 +1,9 @@
-package config
+package com
 
 import (
 	"flag"
 	"fmt"
+	"reflect"
 	"strings"
 
 	"github.com/fsnotify/fsnotify"
@@ -11,20 +12,10 @@ import (
 	"github.com/spf13/viper"
 )
 
-var gConfig Config
-
-func Cfg() *Config {
-	return &gConfig
-}
-
-type Config struct {
-	Host    string `yaml:"host"`
-	Port    int    `yaml:"port"`
-	Inner   bool   `yaml:"inner"`
-	CfgPath string `yaml:"cfg_path"`
-}
-
-func ReadConfig(filepath string) {
+func ReadConfig(filepath string, cfg interface{}) {
+	if reflect.TypeOf(cfg).Kind() != reflect.Ptr {
+		panic("cfg must be a point")
+	}
 	// read flag
 	pflag.CommandLine.AddGoFlagSet(flag.CommandLine)
 	pflag.Parse()
@@ -47,7 +38,7 @@ func ReadConfig(filepath string) {
 
 	viper.WatchConfig()
 	viper.OnConfigChange(func(e fsnotify.Event) {})
-	err = viper.Unmarshal(&gConfig, func(c *mapstructure.DecoderConfig) {
+	err = viper.Unmarshal(cfg, func(c *mapstructure.DecoderConfig) {
 		c.TagName = "yaml"
 	})
 	if err != nil {

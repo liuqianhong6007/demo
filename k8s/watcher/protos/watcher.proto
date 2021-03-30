@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+option go_package = ".;protocol";
+
+service WatchService {
+  rpc Watch(MatchPodCondition) returns(stream MatchPodResponse) {}
+}
+
+message MatchPodCondition{
+  string namespace = 1; // 命名空间
+  string label_selector = 2; // 标签匹配
+}
+
+message MatchPodResponse{
+  enum MatchPodResponseStatus {
+    Ok = 0;
+    ParamError = 1;
+    UnknownError = 2;
+  }
+  MatchPodResponseStatus status = 1; // 返回状态
+  repeated Pod pods = 2; // pod 列表
+}
+
+
+message Pod {
+  string addr = 1;// pod 地址
+}

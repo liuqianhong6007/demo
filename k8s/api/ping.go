@@ -5,11 +5,11 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/liuqianhong6007/demo/k8s/internal"
+	"github.com/liuqianhong6007/demo/k8s/com"
 )
 
 func init() {
-	internal.AddRoute(internal.Routes{
+	com.AddRoute(com.Routes{
 		{
 			Method:  http.MethodGet,
 			Path:    "/ping",
