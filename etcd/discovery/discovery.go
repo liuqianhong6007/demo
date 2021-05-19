@@ -17,6 +17,7 @@ type Discovery struct {
 	leaseGrantMutex sync.Mutex
 	logger          *zap.Logger
 	closeChan       chan struct{}
+	sync.Once
 }
 
 func NewDiscovery(endpoints string, logger *zap.Logger) *Discovery {
@@ -52,9 +53,6 @@ func (s *Discovery) Register(key, val string) error {
 		return err
 	}
 
-	/*keepAliveCtx, keepAliveCancel := context.WithTimeout(context.Background(), 1*time.Nanosecond)
-	defer keepAliveCancel()*/
-
 	leaseKeepActive, err := s.client.KeepAlive(context.Background(), leaseGrant.ID)
 	if err != nil {
 		return err
@@ -62,6 +60,18 @@ func (s *Discovery) Register(key, val string) error {
 
 	s.leaseGrants[key] = leaseGrant
 	s.logger.Info(fmt.Sprintf("register success: key = %s", key))
+
+	s.doAsync(func() {
+		<-time.After(10 * time.Second)
+
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+
+		_, err := s.client.Put(ctx, key, "modify", clientv3.WithLease(leaseGrant.ID))
+		if err != nil {
+			panic(err)
+		}
+	})
 
 	s.doAsync(func() {
 		for {
@@ -125,6 +135,29 @@ func (s *Discovery) Watch(keyPrefix string) {
 
 				for _, ev := range event.Events {
 					s.logger.Info("[watch] receive event", zap.Int("type", int(ev.Type)), zap.String("key", string(ev.Kv.Key)), zap.String("val", string(ev.Kv.Value)))
+
+					switch ev.Type {
+					case clientv3.EventTypePut:
+						if ev.Kv.Version == 1 {
+							s.logger.Info("[CREATE]", zap.String("key", string(ev.Kv.Key)), zap.String("value", string(ev.Kv.Value)), zap.Int64("leaseID", ev.Kv.Lease))
+						} else {
+							s.logger.Info("[UPDATE]", zap.String("key", string(ev.Kv.Key)), zap.String("value", string(ev.Kv.Value)), zap.Int64("leaseID", ev.Kv.Lease))
+							s.Once.Do(func() {
+								s.doAsync(func() {
+									ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+									defer cancel()
+
+									_, err := s.client.Put(ctx, string(ev.Kv.Key), "modify again", clientv3.WithLease(clientv3.LeaseID(ev.Kv.Lease)))
+									if err != nil {
+										panic(err)
+									}
+								})
+							})
+						}
+
+					case clientv3.EventTypeDelete:
+
+					}
 				}
 			}
 		}
@@ -140,7 +173,7 @@ func (s *Discovery) Watch(keyPrefix string) {
 	}
 
 	for _, kv := range rsp.Kvs {
-		s.logger.Info("[watch] get", zap.String("key", string(kv.Key)), zap.String("val", string(kv.Value)))
+		s.logger.Info("[watch] get", zap.String("key", string(kv.Key)), zap.String("val", string(kv.Value)), zap.Int64("leaseID", kv.Lease))
 	}
 }
 
