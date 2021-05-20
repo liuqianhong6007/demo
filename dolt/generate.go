@@ -32,9 +32,16 @@ func Gen(metadataFile string) error {
 			Args       []string
 			Options    []string
 		}
-		temp.StructName = strings.Replace(cmd.Command, " ", "_", -1)
-		temp.Args = cmd.Args
-		temp.Options = cmd.Options
+		temp.StructName = strings.Replace(strings.Replace(cmd.Command, " ", "_", -1), "-", "_", -1)
+		for _, arg := range cmd.Args {
+			arg = strings.Replace(arg, "-", "_", -1)
+			temp.Args = append(temp.Args, strings.ToUpper(string(arg[0]))+arg[1:])
+		}
+		for _, option := range cmd.Options {
+			option = strings.Replace(option, "-", "_", -1)
+			temp.Options = append(temp.Options, strings.ToUpper(string(option[0]))+option[1:])
+		}
+
 		err = genFile(temp.StructName+".auto.go", temp)
 		if err != nil {
 			return err
@@ -73,13 +80,21 @@ import(
 	"github.com/gin-gonic/gin"
 )
 
-type {{.StructName}} struct{
+type {{.StructName}}_Args struct{
 	{{range .Args}}
 	{{.}} string
 	{{end}}
+}
+
+type {{.StructName}}_Opts struct{
 	{{range .Options}}
 	{{.}} string
 	{{end}}
+}
+
+type {{.StructName}} struct{
+	Args {{.StructName}}_Args
+	Opts {{.StructName}}_Opts
 }
 
 func (s *Server) {{.StructName}}(c *gin.Context){
