@@ -1,0 +1,43 @@
+{"args":null,"command":"dolt init","options":["name","email","date"]}
+{"args":null,"command":"dolt status","options":null}
+{"args":["table"],"command":"dolt add","options":["all"]}
+{"args":null,"command":"dolt reset","options":["hard","soft"]}
+{"args":null,"command":"dolt commit","options":["message","allow-empty","date","force","author","all"]}
+{"args":["commit"],"command":"dolt sql","options":["query","result-format","save","execute","list-saved","message","batch","multi-db-dir"]}
+{"args":null,"command":"dolt sql-server","options":["config","host","port","user","password","timeout","readonly","loglevel","multi-db-dir","no-auto-commit","query-parallelism","max-connections"]}
+{"args":null,"command":"dolt log","options":["number"]}
+{"args":null,"command":"dolt diff","options":["data","schema","summary","result-format","where","limit","cached"]}
+{"args":null,"command":"dolt blame","options":null}
+{"args":null,"command":"dolt merge","options":["no-ff","squash","message","abort"]}
+{"args":["start-point"],"command":"dolt branch","options":["list","force","copy","move","delete","D","verbose","all","remote","show-current"]}
+{"args":["ref"],"command":"dolt tag","options":["message","verbose","delete"]}
+{"args":null,"command":"dolt checkout","options":["b"]}
+{"args":["region","creds-type","profile"],"command":"dolt remote","options":["verbose","aws-region","aws-creds-type","aws-creds-file","aws-creds-profile"]}
+{"args":null,"command":"dolt push","options":["set-upstream","force"]}
+{"args":null,"command":"dolt pull","options":["squash"]}
+{"args":null,"command":"dolt fetch","options":["force"]}
+{"args":null,"command":"dolt clone","options":["remote","branch","aws-region","aws-creds-type","aws-creds-file","aws-creds-profile"]}
+{"args":null,"command":"dolt creds new","options":null}
+{"args":null,"command":"dolt creds rm","options":null}
+{"args":null,"command":"dolt creds ls","options":["verbose"]}
+{"args":null,"command":"dolt creds check","options":["endpoint","creds"]}
+{"args":null,"command":"dolt creds use","options":null}
+{"args":["jwk_filename"],"command":"dolt creds import","options":["no-profile"]}
+{"args":["creds"],"command":"dolt login","options":null}
+{"args":null,"command":"dolt config","options":["global","local","add","list","get","unset"]}
+{"args":null,"command":"dolt ls","options":["verbose","system","all"]}
+{"args":["table","file"],"command":"dolt schema export","options":null}
+{"args":["table","file"],"command":"dolt schema import","options":["create","update","replace","dry-run","keep-types","file-type","pks","map","float-threshold","delim"]}
+{"args":["table","commit"],"command":"dolt schema show","options":null}
+{"args":["table"],"command":"dolt schema tags","options":["result-format"]}
+{"args":["table","file"],"command":"dolt table import","options":["create-table","update-table","force","replace-table","continue","no-gc","schema","map","pk","file-type","delim"]}
+{"args":["table","file"],"command":"dolt table export","options":["force","continue","schema","map","pk","file-type"]}
+{"args":["table"],"command":"dolt table rm","options":null}
+{"args":["oldtable","newtable"],"command":"dolt table mv","options":["force"]}
+{"args":["oldtable","newtable"],"command":"dolt table cp","options":["force"]}
+{"args":["table"],"command":"dolt conflicts cat","options":null}
+{"args":["table","key"],"command":"dolt conflicts resolve","options":["ours","theirs"]}
+{"args":["remote-repo","commit","table"],"command":"dolt read-tables","options":["dir"]}
+{"args":null,"command":"dolt gc","options":["shallow"]}
+{"args":null,"command":"dolt filter-branch","options":["all"]}
+{"args":null,"command":"dolt merge-base","options":null}
