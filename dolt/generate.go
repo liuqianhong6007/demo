@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
@@ -56,6 +55,18 @@ func Gen(metadataFile string) error {
 			log.Println(err)
 			return err
 		}
+
+		err = genTestFile(cmdTemplate.StructName+".auto_test.go", cmdTemplate)
+		if err != nil {
+			log.Println(err)
+			return err
+		}
+	}
+
+	err = genTestUtilFile("dolt_test_util.go", nil)
+	if err != nil {
+		log.Println(err)
+		return err
 	}
 
 	return nil
@@ -72,6 +83,10 @@ import(
 
 	"github.com/gin-gonic/gin"
 )
+
+func init(){
+	gServer.RegRoute(http.MethodPost, "/{{.StructName}}", gServer.{{.StructName}})
+}
 
 type {{.StructName}}_Args struct{
 	{{range .Args}} 
@@ -159,9 +174,138 @@ func (s *Server) {{.StructName}}(c *gin.Context){
 	
 	c.JSON(http.StatusOK, map[string]interface{}{
 		"code":    http.StatusOK,
-		"message": result,
+		"message": "OK",
+		"ret":     result,
 	})
 }
+`
+
+var apiTestTemplate = `
+package main
+
+import(
+	"net/http"
+	"testing"
+)
+
+func Test_{{.StructName}}(t *testing.T){
+	var rsp JsonResponse
+	err := JsonRequest(
+		http.MethodPost, 
+		reqPath("/{{.StructName}}"), {{.StructName}}{
+			Args: {{.StructName}}_Args{
+				{{range .Args}} 
+				{{index . 0}}: "",
+				{{end}}
+			},
+			Opts: {{.StructName}}_Opts{
+				{{range .Options}} 
+				{{index . 0}}: "",
+				{{end}}		
+			},
+			Flags: {{.StructName}}_Flags{
+				{{range .Flags}} 
+				{{index . 0}}: false,
+				{{end}}		
+			},
+		},
+		nil,
+		&rsp,
+	)
+	if err != nil{
+		t.Fatal(err)
+	}
+	t.Log(rsp)
+}
+`
+
+var apiTestUtilTemplate = `
+package main
+
+import(
+	"bytes"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"io/ioutil"	
+	"net/http"
+	"reflect"
+	"strings"
+)
+
+type SignatureHook func(req *http.Request, msg []byte) error
+
+func JsonRequest(method, path string, params interface{}, signature SignatureHook, ret interface{}) error {
+	if ret != nil {
+		if reflect.TypeOf(ret).Kind() != reflect.Ptr {
+			return errors.New("ret must be a ptr type")
+		}
+	}
+
+	client := http.Client{}
+	req, err := http.NewRequest(method, path, nil)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("content-type", "application/json")
+
+	var msg []byte
+	if params != nil {
+		buf, err := json.Marshal(params)
+		if err != nil {
+			return err
+		}
+		req.ContentLength = int64(len(buf))
+		req.Body = ioutil.NopCloser(bytes.NewReader(buf))
+		msg = buf
+	}
+
+	if signature != nil {
+		err = signature(req, msg)
+		if err != nil {
+			return err
+		}
+	}
+
+	rsp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer rsp.Body.Close()
+
+	switch rsp.StatusCode {
+	case http.StatusOK:
+		if ret != nil {
+			buf, err := ioutil.ReadAll(rsp.Body)
+			if err != nil {
+				return err
+			}
+			err = json.Unmarshal(buf, ret)
+			if err != nil {
+				return err
+			}
+		}
+
+	default:
+		return errors.New("http return unexpected status code: " + rsp.Status)
+	}
+
+	return nil
+}
+
+func reqPath(rPath string) string {
+	if strings.HasPrefix(rPath, "/") {
+		rPath = strings.TrimPrefix(rPath, "/")
+	}
+	return fmt.Sprintf("http://127.0.0.1:8600/%s", rPath)
+}
+
+type JsonResponse struct{
+	Code int
+	Message string
+	Ret interface{}
+}
+
 `
 
 func init() {
@@ -216,7 +360,6 @@ func genFile(filename string, data interface{}) error {
 	tpl := template.Must(
 		template.New("api").Funcs(template.FuncMap{}).Parse(apiTemplate),
 	)
-	fmt.Println(apiTemplate)
 	var bf bytes.Buffer
 	err := tpl.Execute(&bf, data)
 	if err != nil {
@@ -224,7 +367,47 @@ func genFile(filename string, data interface{}) error {
 		return err
 	}
 
-	err = ioutil.WriteFile(filename, bf.Bytes(), os.ModePerm)
+	err = ioutil.WriteFile(filename, bf.Bytes(), 0644)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
+	return nil
+}
+
+func genTestFile(filename string, data interface{}) error {
+	tpl := template.Must(
+		template.New("api_test").Funcs(template.FuncMap{}).Parse(apiTestTemplate),
+	)
+	var bf bytes.Buffer
+	err := tpl.Execute(&bf, data)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
+	err = ioutil.WriteFile(filename, bf.Bytes(), 0644)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
+	return nil
+}
+
+func genTestUtilFile(filename string, data interface{}) error {
+	tpl := template.Must(
+		template.New("api_test_util").Funcs(template.FuncMap{}).Parse(apiTestUtilTemplate),
+	)
+	var bf bytes.Buffer
+	err := tpl.Execute(&bf, data)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
+	err = ioutil.WriteFile(filename, bf.Bytes(), 0644)
 	if err != nil {
 		log.Println(err)
 		return err
