@@ -23,6 +23,9 @@ func Gen(metadataFile string) error {
 		return nil
 	}
 
+	var docBuf []byte
+	docBuf = append(docBuf, []byte(docAPITitle)...)
+
 	for _, buff := range buffArray {
 		var cmd Cmd
 		err = json.Unmarshal(buff, &cmd)
@@ -55,9 +58,22 @@ func Gen(metadataFile string) error {
 			log.Println(err)
 			return err
 		}
+
+		buf, err := genAPIDoc(cmdTemplate)
+		if err != nil {
+			log.Println(err)
+			return err
+		}
+		docBuf = append(docBuf, buf...)
 	}
 
 	err = genTestUtilFile("dolt_test_util.go", nil)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
+	err = write("dolt_api_doc.md", docBuf)
 	if err != nil {
 		log.Println(err)
 		return err
@@ -178,6 +194,7 @@ func (s *Server) {{.StructName}}(c *gin.Context){
 		"ret":     result,
 	})
 }
+
 `
 
 var apiTestTemplate = `
@@ -218,6 +235,7 @@ func Test_{{.StructName}}(t *testing.T){
 	t.Log(marshalJson(rsp))
 	t.Log(rsp.Ret)
 }
+
 `
 
 var apiTestUtilTemplate = `
@@ -314,6 +332,30 @@ func marshalJson(obj interface{}) string {
 
 `
 
+var docAPITitle = `
+# Dolt API 接口文档
+
+`
+
+var docAPITemplate = `
+## /{{.StructName}}
+
+### 入参
+
+{{range .Args}} 
+* {{index . 0}}: 参数
+{{end}}
+
+{{range .Options}} 
+* {{index . 0}}: 可选项
+{{end}}
+
+{{range .Flags}} 
+* {{index . 0}}: 标志
+{{end}}
+
+`
+
 func init() {
 	apiTemplate = strings.Replace(apiTemplate, "$(ARG_TAG)", "`cmd:\"{{index . 1}}\"`", -1)
 	apiTemplate = strings.Replace(apiTemplate, "$(OPT_TAG)", "`cmd:\"{{index . 1}}\"`", -1)
@@ -358,6 +400,15 @@ func read(filename string) ([][]byte, error) {
 	return buffArray, nil
 }
 
+func write(filename string, buf []byte) error {
+	err := ioutil.WriteFile(filename, buf, 0644)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	return nil
+}
+
 func normalize(s string) string {
 	s = strings.Replace(strings.Replace(s, " ", "_", -1), "-", "_", -1)
 	return strings.ToUpper(string(s[0])) + s[1:]
@@ -374,7 +425,7 @@ func genFile(filename string, data interface{}) error {
 		return err
 	}
 
-	err = ioutil.WriteFile(filename, bf.Bytes(), 0644)
+	err = write(filename, bf.Bytes())
 	if err != nil {
 		log.Println(err)
 		return err
@@ -394,7 +445,7 @@ func genTestFile(filename string, data interface{}) error {
 		return err
 	}
 
-	err = ioutil.WriteFile(filename, bf.Bytes(), 0644)
+	err = write(filename, bf.Bytes())
 	if err != nil {
 		log.Println(err)
 		return err
@@ -414,11 +465,24 @@ func genTestUtilFile(filename string, data interface{}) error {
 		return err
 	}
 
-	err = ioutil.WriteFile(filename, bf.Bytes(), 0644)
+	err = write(filename, bf.Bytes())
 	if err != nil {
 		log.Println(err)
 		return err
 	}
 
 	return nil
+}
+
+func genAPIDoc(data interface{}) ([]byte, error) {
+	tpl := template.Must(
+		template.New("api_doc").Funcs(template.FuncMap{}).Parse(docAPITemplate),
+	)
+	var bf bytes.Buffer
+	err := tpl.Execute(&bf, data)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	return bf.Bytes(), nil
 }
