@@ -38,13 +38,25 @@ func Gen(metadataFile string) error {
 		cmdTemplate.Cmd = cmd.Command
 		cmdTemplate.StructName = normalize(cmd.Command)
 		for _, arg := range cmd.Args {
-			cmdTemplate.Args = append(cmdTemplate.Args, [2]string{normalize(arg), arg})
+			cmdTemplate.Args = append(cmdTemplate.Args, CmdTemplateItem{
+				Value: normalize(arg.Value),
+				Cmd:   arg.Value,
+				Desc:  arg.Desc,
+			})
 		}
 		for _, option := range cmd.Options {
-			cmdTemplate.Options = append(cmdTemplate.Options, [2]string{normalize(option), option})
+			cmdTemplate.Options = append(cmdTemplate.Options, CmdTemplateItem{
+				Value: normalize(option.Value),
+				Cmd:   option.Value,
+				Desc:  option.Desc,
+			})
 		}
 		for _, f := range cmd.Flags {
-			cmdTemplate.Flags = append(cmdTemplate.Flags, [2]string{normalize(f), f})
+			cmdTemplate.Flags = append(cmdTemplate.Flags, CmdTemplateItem{
+				Value: normalize(f.Value),
+				Cmd:   f.Value,
+				Desc:  f.Desc,
+			})
 		}
 
 		err = genFile(strings.ToLower(cmdTemplate.StructName)+".auto.go", cmdTemplate)
@@ -102,19 +114,19 @@ func init(){
 
 type {{.StructName}}_Args struct{
 	{{- range .Args}} 
-	{{index . 0}} string $(ARG_TAG)
+	{{.Value}} string $(ARG_TAG)
 	{{- end}}
 }
 
 type {{.StructName}}_Opts struct{
 	{{- range .Options}}
-	{{index . 0}} string $(OPT_TAG)
+	{{.Value}} string $(OPT_TAG)
 	{{- end}}
 }
 
 type {{.StructName}}_Flags struct{
 	{{- range .Flags}}
-	{{index . 0}} bool $(FLAG_TAG)
+	{{.Value}} bool $(FLAG_TAG)
 	{{- end}}
 }
 
@@ -182,9 +194,9 @@ func (s *Server) {{.StructName}}(c *gin.Context){
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, map[string]interface{}{
 			"code":    http.StatusInternalServerError,
-			"message": "Internal Server error",
+			"message": err.Error(),
 		})
-		s.logger.Error("Internal Server error",zap.Error(err))
+		s.logger.Error(err.Error())
 		return
 	}
 	
@@ -212,17 +224,17 @@ func Test_{{.StructName}}(t *testing.T){
 		reqPath("/{{.StructName}}"), {{.StructName}}{
 			Args: {{.StructName}}_Args{
 				{{- range .Args}} 
-				{{index . 0}}: "",
+				{{.Value}}: "",
 				{{- end}}
 			},
 			Opts: {{.StructName}}_Opts{
 				{{- range .Options}} 
-				{{index . 0}}: "",
+				{{.Value}}: "",
 				{{- end}}		
 			},
 			Flags: {{.StructName}}_Flags{
 				{{- range .Flags}} 
-				{{index . 0}}: false,
+				{{.Value}}: false,
 				{{- end}}		
 			},
 		},
@@ -335,49 +347,82 @@ func marshalJson(obj interface{}) string {
 var docAPITitle = `
 # Dolt API 接口文档
 
+## 统一规范
+
+请求结果返回三个字段
+
+* Code
+
+返回状态码，200 正常返回，400 请求参数错误, 500 内部错误
+
+* Message
+
+当 Code 返回非 200 时，Message 显示具体错误
+
+* Ret
+
+当 Code 返回 200 时, Ret 返回结果详情
+
 `
 
 var docAPITemplate = `
 ## /{{.StructName}}
 
-### 入参
+### 入参规范
 
 {{range .Args}} 
-* {{index . 0}}: 参数
+* {{.Value}}
+
+{{.Desc}}
 {{end}}
 
 {{range .Options}} 
-* {{index . 0}}: 可选项
+* {{.Value}}
+
+{{.Desc}}
 {{end}}
 
 {{range .Flags}} 
-* {{index . 0}}: 标志
+* {{.Value}}
+
+{{.Desc}}
 {{end}}
 
 `
 
 func init() {
-	apiTemplate = strings.Replace(apiTemplate, "$(ARG_TAG)", "`cmd:\"{{index . 1}}\"`", -1)
-	apiTemplate = strings.Replace(apiTemplate, "$(OPT_TAG)", "`cmd:\"{{index . 1}}\"`", -1)
-	apiTemplate = strings.Replace(apiTemplate, "$(FLAG_TAG)", "`cmd:\"{{index . 1}}\"`", -1)
+	apiTemplate = strings.Replace(apiTemplate, "$(ARG_TAG)", "`cmd:\"{{.Cmd}}\"`", -1)
+	apiTemplate = strings.Replace(apiTemplate, "$(OPT_TAG)", "`cmd:\"{{.Cmd}}\"`", -1)
+	apiTemplate = strings.Replace(apiTemplate, "$(FLAG_TAG)", "`cmd:\"{{.Cmd}}\"`", -1)
 	apiTemplate = strings.Replace(apiTemplate, "$(CMD_TAG)", "`cmd:\"{{.Cmd}}\",json:\"-\"`", -1)
 }
 
 // template struct
 type CmdTemplate struct {
 	StructName string
-	Args       [][2]string
-	Options    [][2]string
-	Flags      [][2]string
+	Args       []CmdTemplateItem
+	Options    []CmdTemplateItem
+	Flags      []CmdTemplateItem
 	Cmd        string // used for CMD
+}
+
+type CmdTemplateItem struct {
+	Value string
+	Desc  string
+	Cmd   string
 }
 
 // metadata struct
 type Cmd struct {
-	Command string   `json:"command"`
-	Args    []string `json:"args"`
-	Options []string `json:"options"`
-	Flags   []string `json:"flags"`
+	Command string `json:"command"`
+	Args    []Item `json:"args"`
+	Options []Item `json:"options"`
+	Flags   []Item `json:"flags"`
+}
+
+type Item struct {
+	Value string `json:"value"`
+	Desc  string `json:"desc"`
 }
 
 func read(filename string) ([][]byte, error) {
