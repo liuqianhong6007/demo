@@ -1,6 +1,7 @@
 package main
 
 import (
+	"os"
 	"time"
 
 	"github.com/gin-contrib/zap"
@@ -8,15 +9,18 @@ import (
 	"go.uber.org/zap"
 )
 
-var gServer = &Server{}
-
-type Server struct {
-	addr   string
-	logger *zap.Logger
-	engine *gin.Engine
+var gServer = &Server{
+	engine: gin.New(),
 }
 
-func (s *Server) Init(addr string, logger *zap.Logger) {
+type Server struct {
+	addr    string
+	logger  *zap.Logger
+	engine  *gin.Engine
+	workDir string
+}
+
+func (s *Server) Init(addr, workDir string, logger *zap.Logger) {
 	var err error
 	if logger == nil {
 		logger, err = zap.NewDevelopment()
@@ -24,11 +28,17 @@ func (s *Server) Init(addr string, logger *zap.Logger) {
 			panic(err)
 		}
 	}
+
+	if err = os.Chdir(workDir); err != nil {
+		panic(err)
+	}
+
 	s.addr = addr
+	s.workDir = workDir
 	s.logger = logger
-	s.engine = gin.New()
 	s.engine.Use(ginzap.Ginzap(logger, time.RFC3339, true))
 	s.engine.Use(ginzap.RecoveryWithZap(logger, false))
+	s.logger.Info("set work dir", zap.String("workdir", s.workDir))
 }
 
 func (s *Server) RegRoute(httpMethod, relativePath string, handlers ...gin.HandlerFunc) {

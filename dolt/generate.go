@@ -35,28 +35,22 @@ func Gen(metadataFile string) error {
 		cmdTemplate.Cmd = cmd.Command
 		cmdTemplate.StructName = normalize(cmd.Command)
 		for _, arg := range cmd.Args {
-			cmdArg := arg
-			arg = normalize(arg)
-			cmdTemplate.Args = append(cmdTemplate.Args, [2]string{strings.ToUpper(string(arg[0])) + arg[1:], cmdArg})
+			cmdTemplate.Args = append(cmdTemplate.Args, [2]string{normalize(arg), arg})
 		}
 		for _, option := range cmd.Options {
-			cmdOption := option
-			option = normalize(option)
-			cmdTemplate.Options = append(cmdTemplate.Options, [2]string{strings.ToUpper(string(option[0])) + option[1:], cmdOption})
+			cmdTemplate.Options = append(cmdTemplate.Options, [2]string{normalize(option), option})
 		}
 		for _, f := range cmd.Flags {
-			cmdFlags := f
-			f = normalize(f)
-			cmdTemplate.Flags = append(cmdTemplate.Flags, [2]string{strings.ToUpper(string(f[0])) + f[1:], cmdFlags})
+			cmdTemplate.Flags = append(cmdTemplate.Flags, [2]string{normalize(f), f})
 		}
 
-		err = genFile(cmdTemplate.StructName+".auto.go", cmdTemplate)
+		err = genFile(strings.ToLower(cmdTemplate.StructName)+".auto.go", cmdTemplate)
 		if err != nil {
 			log.Println(err)
 			return err
 		}
 
-		err = genTestFile(cmdTemplate.StructName+".auto_test.go", cmdTemplate)
+		err = genTestFile(strings.ToLower(cmdTemplate.StructName)+".auto_test.go", cmdTemplate)
 		if err != nil {
 			log.Println(err)
 			return err
@@ -80,8 +74,10 @@ import(
 	"net/http"
 	"os/exec"
 	"reflect"
+	"strings"
 
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
 func init(){
@@ -121,10 +117,17 @@ func (s *Server) {{.StructName}}(c *gin.Context){
 			"code":    http.StatusBadRequest,
 			"message": "Request param error",
 		})
+		s.logger.Error("Request param error",zap.Error(err))
 		return
 	}
 
 	var args []string
+	// get command string
+	cmdField, _ := reflect.TypeOf(param).FieldByName("Cmd")
+	sub := strings.Split(cmdField.Tag.Get("cmd")," ")
+	commandStr := sub[0]
+	args = append(args,sub[1:]...)
+
 	// parse cmd opt
 	{
 		typeObj := reflect.TypeOf(param.Opts)
@@ -158,10 +161,6 @@ func (s *Server) {{.StructName}}(c *gin.Context){
 		}
 	}
 
-	// get command string
-	cmdField, _ := reflect.TypeOf(param).FieldByName("Cmd")
-	commandStr := cmdField.Tag.Get("cmd")
-
 	// call dolt command
 	result,err := Execute(exec.Command(commandStr, args...))
 	if err != nil {
@@ -169,6 +168,7 @@ func (s *Server) {{.StructName}}(c *gin.Context){
 			"code":    http.StatusInternalServerError,
 			"message": "Internal Server error",
 		})
+		s.logger.Error("Internal Server error",zap.Error(err))
 		return
 	}
 	
@@ -353,7 +353,8 @@ func read(filename string) ([][]byte, error) {
 }
 
 func normalize(s string) string {
-	return strings.Replace(strings.Replace(s, " ", "_", -1), "-", "_", -1)
+	s = strings.Replace(strings.Replace(s, " ", "_", -1), "-", "_", -1)
+	return strings.ToUpper(string(s[0])) + s[1:]
 }
 
 func genFile(filename string, data interface{}) error {
