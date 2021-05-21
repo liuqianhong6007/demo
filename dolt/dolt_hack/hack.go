@@ -18,18 +18,30 @@ func init() {
 	}
 }
 
+type Item struct {
+	Value string `json:"value"`
+	Desc  string `json:"desc"`
+}
+
 func dump(file *os.File, cmdDoc cli.CommandDocumentation) {
-	var args []string
+	var args []Item
 	for _, argListHelp := range cmdDoc.ArgParser.ArgListHelp {
-		args = append(args, argListHelp[0])
+		args = append(args, Item{
+			Value: argListHelp[0],
+			Desc:  argListHelp[1],
+		})
 	}
 
-	var options, flags []string
+	var options, flags []Item
 	for _, opt := range cmdDoc.ArgParser.Supported {
+		ietm := Item{
+			Value: opt.Name,
+			Desc:  opt.Desc,
+		}
 		if opt.OptType == argparser.OptionalFlag {
-			flags = append(flags, opt.Name)
+			flags = append(flags, ietm)
 		} else {
-			options = append(options, opt.Name)
+			options = append(options, ietm)
 		}
 	}
 
