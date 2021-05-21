@@ -215,7 +215,8 @@ func Test_{{.StructName}}(t *testing.T){
 	if err != nil{
 		t.Fatal(err)
 	}
-	t.Log(rsp)
+	t.Log(marshalJson(rsp))
+	t.Log(rsp.Ret)
 }
 `
 
@@ -304,6 +305,11 @@ type JsonResponse struct{
 	Code int
 	Message string
 	Ret interface{}
+}
+
+func marshalJson(obj interface{}) string {
+	buf,_ := json.Marshal(obj)
+	return string(buf)
 }
 
 `

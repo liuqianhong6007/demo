@@ -9,18 +9,23 @@ import (
 	"go.uber.org/zap"
 )
 
-var gServer = &Server{
-	engine: gin.New(),
-}
+var gServer = &Server{}
 
 type Server struct {
-	addr    string
-	logger  *zap.Logger
-	engine  *gin.Engine
-	workDir string
+	addr     string
+	logger   *zap.Logger
+	engine   *gin.Engine
+	wd       string
+	handlers []Handler
 }
 
-func (s *Server) Init(addr, workDir string, logger *zap.Logger) {
+type Handler struct {
+	httpMethod   string
+	relativePath string
+	handlers     []gin.HandlerFunc
+}
+
+func (s *Server) Init(addr, wd string, logger *zap.Logger) {
 	var err error
 	if logger == nil {
 		logger, err = zap.NewDevelopment()
@@ -29,20 +34,29 @@ func (s *Server) Init(addr, workDir string, logger *zap.Logger) {
 		}
 	}
 
-	if err = os.Chdir(workDir); err != nil {
+	if err = os.Chdir(wd); err != nil {
 		panic(err)
 	}
 
 	s.addr = addr
-	s.workDir = workDir
+	s.wd = wd
 	s.logger = logger
+	s.engine = gin.New()
 	s.engine.Use(ginzap.Ginzap(logger, time.RFC3339, true))
 	s.engine.Use(ginzap.RecoveryWithZap(logger, false))
-	s.logger.Info("set work dir", zap.String("workdir", s.workDir))
+	s.logger.Info("set work dir", zap.String("wd", s.wd))
+
+	for _, h := range s.handlers {
+		s.engine.Handle(h.httpMethod, h.relativePath, h.handlers...)
+	}
 }
 
 func (s *Server) RegRoute(httpMethod, relativePath string, handlers ...gin.HandlerFunc) {
-	s.engine.Handle(httpMethod, relativePath, handlers...)
+	s.handlers = append(s.handlers, Handler{
+		httpMethod:   httpMethod,
+		relativePath: relativePath,
+		handlers:     handlers,
+	})
 }
 
 func (s *Server) Serve() {

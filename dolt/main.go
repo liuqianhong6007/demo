@@ -11,7 +11,7 @@ var (
 	gGenerate = flag.Bool("generate", false, "generate rest frame")
 	gMetadata = flag.String("metadata", "metadata", "api metadata filename")
 	addr      = flag.String("addr", ":8600", "server address")
-	workDir   = flag.String("work_dir", ".", "dolt command work dir")
+	wd        = flag.String("wd", ".", "dolt command work dir")
 )
 
 func main() {
@@ -32,7 +32,7 @@ func main() {
 	}
 
 	// init server
-	gServer.Init(*addr, *workDir, logger)
+	gServer.Init(*addr, *wd, logger)
 
 	// server listen and serve
 	gServer.Serve()
