@@ -85,21 +85,21 @@ func init(){
 }
 
 type {{.StructName}}_Args struct{
-	{{range .Args}} 
+	{{- range .Args}} 
 	{{index . 0}} string $(ARG_TAG)
-	{{end}}
+	{{- end}}
 }
 
 type {{.StructName}}_Opts struct{
-	{{range .Options}}
+	{{- range .Options}}
 	{{index . 0}} string $(OPT_TAG)
-	{{end}}
+	{{- end}}
 }
 
 type {{.StructName}}_Flags struct{
-	{{range .Flags}}
+	{{- range .Flags}}
 	{{index . 0}} bool $(FLAG_TAG)
-	{{end}}
+	{{- end}}
 }
 
 type {{.StructName}} struct{
@@ -194,19 +194,19 @@ func Test_{{.StructName}}(t *testing.T){
 		http.MethodPost, 
 		reqPath("/{{.StructName}}"), {{.StructName}}{
 			Args: {{.StructName}}_Args{
-				{{range .Args}} 
+				{{- range .Args}} 
 				{{index . 0}}: "",
-				{{end}}
+				{{- end}}
 			},
 			Opts: {{.StructName}}_Opts{
-				{{range .Options}} 
+				{{- range .Options}} 
 				{{index . 0}}: "",
-				{{end}}		
+				{{- end}}		
 			},
 			Flags: {{.StructName}}_Flags{
-				{{range .Flags}} 
+				{{- range .Flags}} 
 				{{index . 0}}: false,
-				{{end}}		
+				{{- end}}		
 			},
 		},
 		nil,

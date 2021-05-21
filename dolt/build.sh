@@ -6,4 +6,5 @@ go build
 
 ./dolt -generate
 
+go fmt
 go build
