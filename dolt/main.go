@@ -5,10 +5,14 @@ import (
 	"os"
 
 	"go.uber.org/zap"
+
+	"github.com/liuqianhong6007/dolt/generate"
+	"github.com/liuqianhong6007/dolt/server"
 )
 
 var (
 	gGenerate = flag.Bool("generate", false, "generate rest frame")
+	genOutDir = flag.String("gen_out_dir", ".", "generate out dir")
 	gMetadata = flag.String("metadata", "metadata", "api metadata filename")
 	addr      = flag.String("addr", ":8600", "server address")
 	wd        = flag.String("wd", ".", "dolt command work dir")
@@ -18,7 +22,7 @@ func main() {
 	flag.Parse()
 
 	if *gGenerate {
-		err := Gen(*gMetadata)
+		err := generate.Gen(*gMetadata, *genOutDir)
 		if err != nil {
 			os.Exit(1)
 		}
@@ -32,8 +36,8 @@ func main() {
 	}
 
 	// init server
-	gServer.Init(*addr, *wd, logger)
+	server.Init(*addr, *wd, logger)
 
 	// server listen and serve
-	gServer.Serve()
+	server.Serve()
 }

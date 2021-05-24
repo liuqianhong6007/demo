@@ -1,4 +1,4 @@
-package main
+package generate
 
 import (
 	"bufio"
@@ -12,7 +12,7 @@ import (
 	"text/template"
 )
 
-func Gen(metadataFile string) error {
+func Gen(metadataFile, outDir string) error {
 	buffArray, err := read(metadataFile)
 	if err != nil {
 		log.Println(err)
@@ -59,13 +59,13 @@ func Gen(metadataFile string) error {
 			})
 		}
 
-		err = genFile(strings.ToLower(cmdTemplate.StructName)+".auto.go", cmdTemplate)
+		err = genFile(outDir+strings.ToLower(cmdTemplate.StructName)+".auto.go", cmdTemplate)
 		if err != nil {
 			log.Println(err)
 			return err
 		}
 
-		err = genTestFile(strings.ToLower(cmdTemplate.StructName)+".auto_test.go", cmdTemplate)
+		err = genTestFile(outDir+strings.ToLower(cmdTemplate.StructName)+".auto_test.go", cmdTemplate)
 		if err != nil {
 			log.Println(err)
 			return err
@@ -79,13 +79,13 @@ func Gen(metadataFile string) error {
 		docBuf = append(docBuf, buf...)
 	}
 
-	err = genTestUtilFile("dolt_test_util.go", nil)
+	err = genTestUtilFile(outDir+"dolt_test_util.go", nil)
 	if err != nil {
 		log.Println(err)
 		return err
 	}
 
-	err = write("dolt_api_doc.md", docBuf)
+	err = write(outDir+"dolt_api_doc.md", docBuf)
 	if err != nil {
 		log.Println(err)
 		return err
@@ -95,7 +95,7 @@ func Gen(metadataFile string) error {
 }
 
 var apiTemplate = `
-package main
+package server
 
 import(
 	"fmt"
@@ -210,7 +210,7 @@ func (s *Server) {{.StructName}}(c *gin.Context){
 `
 
 var apiTestTemplate = `
-package main
+package server
 
 import(
 	"net/http"
@@ -251,7 +251,7 @@ func Test_{{.StructName}}(t *testing.T){
 `
 
 var apiTestUtilTemplate = `
-package main
+package server
 
 import(
 	"bytes"

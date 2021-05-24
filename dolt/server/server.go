@@ -1,4 +1,4 @@
-package main
+package server
 
 import (
 	"os"
@@ -25,6 +25,7 @@ type Handler struct {
 	handlers     []gin.HandlerFunc
 }
 
+func Init(addr, wd string, logger *zap.Logger) { gServer.Init(addr, wd, logger) }
 func (s *Server) Init(addr, wd string, logger *zap.Logger) {
 	var err error
 	if logger == nil {
@@ -59,6 +60,7 @@ func (s *Server) RegRoute(httpMethod, relativePath string, handlers ...gin.Handl
 	})
 }
 
+func Serve() { gServer.Serve() }
 func (s *Server) Serve() {
 	s.logger.Info("server listen at " + s.addr)
 	if err := s.engine.Run(s.addr); err != nil {
