@@ -112,29 +112,29 @@ func init(){
 	gServer.RegRoute(http.MethodPost, "/{{.StructName}}", gServer.{{.StructName}})
 }
 
-type {{.StructName}}_Args struct{
+type {{.StructName}}_args struct{
 	{{- range .Args}} 
-	{{.Value}} string $(ARG_TAG)
+	{{.Value}} string $(CMD_TAG)
 	{{- end}}
 }
 
-type {{.StructName}}_Opts struct{
+type {{.StructName}}_opts struct{
 	{{- range .Options}}
-	{{.Value}} string $(OPT_TAG)
+	{{.Value}} string $(CMD_TAG)
 	{{- end}}
 }
 
-type {{.StructName}}_Flags struct{
+type {{.StructName}}_flags struct{
 	{{- range .Flags}}
-	{{.Value}} bool $(FLAG_TAG)
+	{{.Value}} bool $(CMD_TAG)
 	{{- end}}
 }
 
 type {{.StructName}} struct{
-	Cmd *struct{} $(CMD_TAG)
-	Args {{.StructName}}_Args
-	Opts {{.StructName}}_Opts
-	Flags {{.StructName}}_Flags
+	Cmd *struct{} $(CMD_IGNORE_JSON_TAG)
+	Args {{.StructName}}_args $(ARG_JSON_TAG)
+	Opts {{.StructName}}_opts $(OPT_JSON_TAG)
+	Flags {{.StructName}}_flags $(FLAG_JSON_TAG)
 }
 
 func (s *Server) {{.StructName}}(c *gin.Context){
@@ -222,17 +222,17 @@ func Test_{{.StructName}}(t *testing.T){
 	err := JsonRequest(
 		http.MethodPost, 
 		reqPath("/{{.StructName}}"), {{.StructName}}{
-			Args: {{.StructName}}_Args{
+			Args: {{.StructName}}_args{
 				{{- range .Args}} 
 				{{.Value}}: "",
 				{{- end}}
 			},
-			Opts: {{.StructName}}_Opts{
+			Opts: {{.StructName}}_opts{
 				{{- range .Options}} 
 				{{.Value}}: "",
 				{{- end}}		
 			},
-			Flags: {{.StructName}}_Flags{
+			Flags: {{.StructName}}_flags{
 				{{- range .Flags}} 
 				{{.Value}}: false,
 				{{- end}}		
@@ -368,33 +368,38 @@ var docAPITitle = `
 var docAPITemplate = `
 ## /{{.StructName}}
 
-### 入参规范
+### Args
 
 {{range .Args}} 
 * {{.Value}}
 
-{{.Desc}}
+{{transformDesc .Desc}}
 {{end}}
+
+### Opts
 
 {{range .Options}} 
 * {{.Value}}
 
-{{.Desc}}
+{{transformDesc .Desc}}
 {{end}}
+
+### Flags
 
 {{range .Flags}} 
 * {{.Value}}
 
-{{.Desc}}
+{{transformDesc .Desc}}
 {{end}}
 
 `
 
 func init() {
-	apiTemplate = strings.Replace(apiTemplate, "$(ARG_TAG)", "`cmd:\"{{.Cmd}}\"`", -1)
-	apiTemplate = strings.Replace(apiTemplate, "$(OPT_TAG)", "`cmd:\"{{.Cmd}}\"`", -1)
-	apiTemplate = strings.Replace(apiTemplate, "$(FLAG_TAG)", "`cmd:\"{{.Cmd}}\"`", -1)
-	apiTemplate = strings.Replace(apiTemplate, "$(CMD_TAG)", "`cmd:\"{{.Cmd}}\",json:\"-\"`", -1)
+	apiTemplate = strings.Replace(apiTemplate, "$(CMD_TAG)", "`cmd:\"{{.Cmd}}\"`", -1)
+	apiTemplate = strings.Replace(apiTemplate, "$(ARG_JSON_TAG)", "`json:\"Args\"`", -1)
+	apiTemplate = strings.Replace(apiTemplate, "$(OPT_JSON_TAG)", "`json:\"Opts\"`", -1)
+	apiTemplate = strings.Replace(apiTemplate, "$(FLAG_JSON_TAG)", "`json:\"Flags\"`", -1)
+	apiTemplate = strings.Replace(apiTemplate, "$(CMD_IGNORE_JSON_TAG)", "`cmd:\"{{.Cmd}}\",json:\"-\"`", -1)
 }
 
 // template struct
@@ -521,7 +526,15 @@ func genTestUtilFile(filename string, data interface{}) error {
 
 func genAPIDoc(data interface{}) ([]byte, error) {
 	tpl := template.Must(
-		template.New("api_doc").Funcs(template.FuncMap{}).Parse(docAPITemplate),
+		template.New("api_doc").Funcs(template.FuncMap{
+			"transformDesc": func(raw string) string {
+				raw = strings.Replace(raw, "{{.EmphasisLeft}}", "**", -1)
+				raw = strings.Replace(raw, "{{.EmphasisRight}}", "**", -1)
+				raw = strings.Replace(raw, "{{.LessThan}}", "<", -1)
+				raw = strings.Replace(raw, "{{.GreaterThan}}", ">", -1)
+				return raw
+			},
+		}).Parse(docAPITemplate),
 	)
 	var bf bytes.Buffer
 	err := tpl.Execute(&bf, data)
